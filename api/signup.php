@@ -15,6 +15,7 @@ $phone    = trim($data['phone']    ?? '');
 $address  = trim($data['address']  ?? '');
 $password = $data['password']      ?? '';
 
+// Validation
 if (!$name || !$email || !$password) {
     echo json_encode(['error' => 'Name, email and password are required']); exit;
 }
@@ -27,6 +28,7 @@ if (strlen($password) < 8) {
     echo json_encode(['error' => 'Password must be at least 8 characters']); exit;
 }
 
+// Check if email already exists
 $stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
 $stmt->bind_param("s", $email);
 $stmt->execute();
@@ -34,8 +36,10 @@ if ($stmt->get_result()->num_rows > 0) {
     echo json_encode(['error' => 'This email is already registered']); exit;
 }
 
+// Create user as customer
 $hash = password_hash($password, PASSWORD_DEFAULT);
 $stmt = $conn->prepare("INSERT INTO users (name, email, password, role, phone, address) VALUES (?,?,'customer',?,?,?)");
+// fix param order
 $stmt = $conn->prepare("INSERT INTO users (name, email, password, role, phone, address) VALUES (?,?,?,'customer',?,?)");
 $stmt->bind_param("sssss", $name, $email, $hash, $phone, $address);
 

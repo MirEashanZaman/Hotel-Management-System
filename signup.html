@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hotel Management System — Register</title>
+  <title>Hotel Management System — Sign Up</title>
   <style>
     *,
     *::before,
@@ -47,17 +47,13 @@
     .bg-pattern {
       position: fixed;
       inset: 0;
-      background:
-        radial-gradient(ellipse 80% 60% at 20% 20%, rgba(201, 168, 76, 0.06) 0%, transparent 60%),
-        radial-gradient(ellipse 60% 80% at 80% 80%, rgba(201, 168, 76, 0.04) 0%, transparent 60%);
+      background: radial-gradient(ellipse 80% 60% at 20% 20%, rgba(201, 168, 76, 0.06) 0%, transparent 60%), radial-gradient(ellipse 60% 80% at 80% 80%, rgba(201, 168, 76, 0.04) 0%, transparent 60%);
     }
 
     .bg-lines {
       position: fixed;
       inset: 0;
-      background-image:
-        linear-gradient(rgba(201, 168, 76, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(201, 168, 76, 0.03) 1px, transparent 1px);
+      background-image: linear-gradient(rgba(201, 168, 76, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(201, 168, 76, 0.03) 1px, transparent 1px);
       background-size: 60px 60px;
     }
 
@@ -264,22 +260,26 @@
       background: rgba(76, 201, 122, 0.08);
     }
 
-    .login-link {
-      text-align: center;
-      margin-top: 20px;
-      font-size: 12px;
-      color: var(--text-muted);
-    }
-
-    .login-link a {
+    .btn-back {
+      display: block;
+      width: 100%;
+      background: transparent;
+      border: 1px solid var(--gold);
       color: var(--gold);
-      text-decoration: none;
-      border-bottom: 1px solid rgba(201, 168, 76, 0.3);
-      transition: border-color 0.2s;
+      padding: 11px;
+      font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      cursor: pointer;
+      margin-top: 12px;
+      transition: all 0.2s;
+      text-align: center;
     }
 
-    .login-link a:hover {
-      border-color: var(--gold);
+    .btn-back:hover {
+      background: var(--gold);
+      color: var(--dark);
     }
 
     .loading-spinner {
@@ -317,18 +317,15 @@
 <body>
   <div class="bg-pattern"></div>
   <div class="bg-lines"></div>
-
   <div class="wrap">
     <div class="hotel-brand">
       <div class="hotel-emblem"><span>H</span></div>
       <h1>Hotel Management</h1>
       <p>System</p>
     </div>
-
     <div class="card">
-      <h2>Create Account</h2>
+      <h2>Sign Up</h2>
       <p class="sub">Register as a new customer</p>
-
       <div class="form-grid">
         <div class="form-group full">
           <label>Full Name</label>
@@ -356,84 +353,52 @@
           <input type="password" id="confirm" placeholder="Repeat password">
         </div>
       </div>
-
-      <button class="btn" id="regBtn" onclick="doRegister()">Create Account</button>
-
+      <button class="btn" id="regBtn" onclick="doSignup()">Sign Up</button>
       <div class="alert alert-error" id="errMsg"></div>
       <div class="alert alert-success" id="okMsg"></div>
+      <button class="btn-back" onclick="window.location.href='index.html'">Back to Sign In</button>
     </div>
-
-    <div class="login-link">Already have an account? <a href="index.html">Sign in</a></div>
   </div>
-
   <script>
     fetch('api/session.php').then(r => r.json()).then(d => {
       if (d.loggedIn) window.location.href = 'dashboard.html';
     });
-
-    async function doRegister() {
+    async function doSignup() {
       const btn = document.getElementById('regBtn');
       const err = document.getElementById('errMsg');
       const ok = document.getElementById('okMsg');
-
       err.classList.remove('show');
       ok.classList.remove('show');
-
       const name = document.getElementById('name').value.trim();
       const email = document.getElementById('email').value.trim();
       const phone = document.getElementById('phone').value.trim();
       const address = document.getElementById('address').value.trim();
       const password = document.getElementById('password').value;
       const confirm = document.getElementById('confirm').value;
-
-      // Validation
-      if (!name || !email || !password || !confirm) {
-        err.textContent = 'Name, email and password are required.';
-        err.classList.add('show'); return;
-      }
-
-      const emailReg = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailReg.test(email)) {
-        err.textContent = 'Please enter a valid email address.';
-        err.classList.add('show'); return;
-      }
-
-      if (password.length < 8) {
-        err.textContent = 'Password must be at least 8 characters.';
-        err.classList.add('show'); return;
-      }
-
-      if (password !== confirm) {
-        err.textContent = 'Passwords do not match.';
-        err.classList.add('show'); return;
-      }
-
+      if (!name || !email || !password || !confirm) { err.textContent = 'Name, email and password are required.'; err.classList.add('show'); return; }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err.textContent = 'Please enter a valid email address.'; err.classList.add('show'); return; }
+      if (password.length < 8) { err.textContent = 'Password must be at least 8 characters.'; err.classList.add('show'); return; }
+      if (password !== confirm) { err.textContent = 'Passwords do not match.'; err.classList.add('show'); return; }
       btn.disabled = true;
       btn.innerHTML = '<span class="loading-spinner"></span>Creating Account...';
-
       try {
-        const res = await fetch('api/register.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, email, phone, address, password })
-        });
+        const res = await fetch('api/signup.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, email, phone, address, password }) });
         const data = await res.json();
-
         if (data.success) {
           ok.textContent = 'Account created! Redirecting to login...';
           ok.classList.add('show');
           setTimeout(() => window.location.href = 'index.html', 2000);
         } else {
-          err.textContent = data.error || 'Registration failed.';
+          err.textContent = data.error || 'Sign up failed.';
           err.classList.add('show');
           btn.disabled = false;
-          btn.innerHTML = 'Create Account';
+          btn.innerHTML = 'Sign Up';
         }
       } catch {
         err.textContent = 'Server error. Please try again.';
         err.classList.add('show');
         btn.disabled = false;
-        btn.innerHTML = 'Create Account';
+        btn.innerHTML = 'Sign Up';
       }
     }
   </script>
