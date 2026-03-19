@@ -9,6 +9,7 @@ const icons = {
   users: `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
   logs: `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10,9 9,9 8,9"/></svg>`,
   profile: `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
+  reviews: `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>`,
 };
 
 async function init() {
@@ -49,6 +50,7 @@ const NAV_CONFIG = {
     { id: 'users', label: 'All Users', icon: icons.users },
     { section: 'System' },
     { id: 'logs', label: 'Activity Logs', icon: icons.logs },
+    { id: 'reviews', label: 'Reviews', icon: icons.reviews },
     { id: 'profile', label: 'My Profile', icon: icons.profile },
   ],
   staff: [
@@ -61,6 +63,7 @@ const NAV_CONFIG = {
     { id: 'services', label: 'Services', icon: icons.services },
     { section: 'Customers' },
     { id: 'users', label: 'Customers', icon: icons.users },
+    { id: 'reviews', label: 'Reviews', icon: icons.reviews },
     { section: 'Account' },
     { id: 'profile', label: 'My Profile', icon: icons.profile },
   ],
@@ -72,6 +75,7 @@ const NAV_CONFIG = {
     { id: 'bookings', label: 'My Bookings', icon: icons.bookings },
     { id: 'payments', label: 'My Payments', icon: icons.payments },
     { id: 'services', label: 'Request Service', icon: icons.services },
+    { id: 'reviews', label: 'My Reviews', icon: icons.reviews },
     { section: 'Account' },
     { id: 'profile', label: 'My Profile', icon: icons.profile },
   ]
@@ -105,7 +109,7 @@ async function navigate(page) {
   document.getElementById('pageTitle').textContent = {
     dashboard: 'Dashboard', rooms: 'Browse Rooms', bookings: 'My Bookings',
     payments: 'My Payments', services: 'Services', users: 'Users',
-    logs: 'Activity Logs', profile: 'My Profile'
+    logs: 'Activity Logs', profile: 'My Profile', reviews: 'Reviews'
   }[page] || page;
 
   const content = document.getElementById('pageContent');
@@ -120,6 +124,7 @@ async function navigate(page) {
     case 'users': await loadUsers(); break;
     case 'logs': await loadLogs(); break;
     case 'profile': await loadProfile(); break;
+    case 'reviews': await loadReviews(); break;
   }
 }
 
@@ -1014,6 +1019,121 @@ async function saveProfile(id) {
   } else {
     alertEl.innerHTML = `<div class="alert alert-error">${res.error}</div>`;
   }
+}
+
+async function loadReviews() {
+  const role = CURRENT_USER.role;
+  const reviews = await api('reviews.php');
+
+  let html = '';
+
+  if (role === 'customer') {
+    const bookings = await api('bookings.php');
+    const checkedOut = bookings.filter(b => b.status === 'checked_out');
+    const reviewedBookingIds = reviews.map(r => r.booking_id);
+    const canReview = checkedOut.filter(b => !reviewedBookingIds.includes(b.id));
+
+    if (canReview.length > 0) {
+      html += `<div class="card" style="margin-bottom:20px;">
+        <div class="card-title">Write a Review</div>
+        <div class="form-grid">
+          <div class="form-group form-col-span">
+            <label>Select Booking</label>
+            <select id="rev_booking">
+              ${canReview.map(b => `<option value="${b.id}" data-room="${b.room_id}">#${b.id} — Room ${b.room_number} (${formatDate(b.check_in)} → ${formatDate(b.check_out)})</option>`).join('')}
+            </select>
+          </div>
+          <div class="form-group form-col-span">
+            <label>Rating</label>
+            <div id="starRating" style="display:flex;gap:6px;margin-top:4px;">
+              ${[1, 2, 3, 4, 5].map(n => `<span onclick="setRating(${n})" data-star="${n}"
+                style="font-size:28px;cursor:pointer;color:var(--border);transition:color 0.15s;">★</span>`).join('')}
+            </div>
+          </div>
+          <div class="form-group form-col-span">
+            <label>Comment</label>
+            <textarea id="rev_comment" placeholder="Share your experience..." style="min-height:90px;"></textarea>
+          </div>
+        </div>
+        <div id="reviewAlert"></div>
+        <div class="form-actions">
+          <button class="btn btn-primary" onclick="submitReview()">Post Review</button>
+        </div>
+      </div>`;
+    }
+
+    const myReviews = reviews.filter(r => r.customer_id == CURRENT_USER.id);
+    html += `<div class="card">
+      <div class="card-title">My Reviews <span class="subtitle">${myReviews.length} review(s)</span></div>
+      ${myReviews.length ? myReviews.map(r => reviewCard(r, true)).join('') : '<div class="empty-state"><p>You have not posted any reviews yet.</p></div>'}
+    </div>`;
+
+  } else {
+    html += `<div class="card">
+      <div class="card-title">All Customer Reviews <span class="subtitle">${reviews.length} review(s)</span></div>
+      ${reviews.length ? reviews.map(r => reviewCard(r, false)).join('') : '<div class="empty-state"><p>No reviews yet.</p></div>'}
+    </div>`;
+  }
+
+  document.getElementById('pageContent').innerHTML = html;
+  window._selectedRating = 0;
+}
+
+function reviewCard(r, isOwn) {
+  const stars = [1, 2, 3, 4, 5].map(n =>
+    `<span style="color:${n <= r.rating ? '#c9a84c' : 'var(--border)'};font-size:18px;">★</span>`
+  ).join('');
+
+  return `<div style="border-bottom:1px solid var(--border2);padding:16px 0;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+      <div>
+        <div style="font-size:13px;color:var(--text);font-weight:500;">${r.customer_name || 'Customer'}</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">
+          Room ${r.room_number || '—'} · Booking #${r.booking_id} · ${formatDate(r.created_at)}
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div>${stars}</div>
+        ${isOwn ? `<button class="btn btn-danger btn-sm" onclick="deleteReview(${r.id})">Delete</button>` : ''}
+        ${CURRENT_USER.role === 'admin' ? `<button class="btn btn-danger btn-sm" onclick="deleteReview(${r.id})">Delete</button>` : ''}
+      </div>
+    </div>
+    ${r.comment ? `<div style="font-size:12px;color:var(--text2);line-height:1.7;">${r.comment}</div>` : ''}
+  </div>`;
+}
+
+function setRating(n) {
+  window._selectedRating = n;
+  document.querySelectorAll('#starRating span').forEach(s => {
+    s.style.color = parseInt(s.dataset.star) <= n ? 'var(--gold)' : 'var(--border)';
+  });
+}
+
+async function submitReview() {
+  const bookingId = val('rev_booking');
+  const rating = window._selectedRating || 0;
+  const comment = val('rev_comment');
+  const alertEl = document.getElementById('reviewAlert');
+  alertEl.innerHTML = '';
+
+  if (!rating) {
+    alertEl.innerHTML = '<div class="alert alert-error">Please select a star rating.</div>'; return;
+  }
+
+  const res = await api('reviews.php', 'POST', { booking_id: bookingId, rating, comment });
+  if (res.success) {
+    toast('Review posted!', 'success');
+    loadReviews();
+  } else {
+    alertEl.innerHTML = `<div class="alert alert-error">${res.error}</div>`;
+  }
+}
+
+async function deleteReview(id) {
+  if (!confirm('Delete this review?')) return;
+  const res = await api('reviews.php', 'DELETE', { id });
+  if (res.success) { toast('Review deleted', 'success'); loadReviews(); }
+  else toast(res.error, 'error');
 }
 
 async function logout() {
