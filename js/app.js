@@ -86,7 +86,14 @@ function renderSidebar() {
   const role = CURRENT_USER.role;
   const items = NAV_CONFIG[role] || [];
 
-  document.getElementById('sidebarAvatar').textContent = CURRENT_USER.name[0].toUpperCase();
+  const avatarEl = document.getElementById('sidebarAvatar');
+  if (CURRENT_USER.avatar_url) {
+    avatarEl.innerHTML = `<img src="${CURRENT_USER.avatar_url}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+    avatarEl.style.padding = '0';
+  } else {
+    avatarEl.textContent = CURRENT_USER.name[0].toUpperCase();
+    avatarEl.style.padding = '';
+  }
   document.getElementById('sidebarName').textContent = CURRENT_USER.name;
   document.getElementById('sidebarRole').textContent = role.charAt(0).toUpperCase() + role.slice(1);
 
@@ -999,16 +1006,27 @@ async function loadLogs() {
 }
 
 async function loadProfile() {
+  window._deleteAvatar = false;
   const u = await api(`users.php?id=${CURRENT_USER.id}`);
   document.getElementById('pageContent').innerHTML = `
     <div style="max-width:580px;">
       <div class="card">
         <div style="display:flex;align-items:center;gap:20px;margin-bottom:28px;padding-bottom:24px;border-bottom:1px solid var(--border);">
-          <div style="width:72px;height:72px;background:var(--gold-dim);border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:32px;color:var(--gold);flex-shrink:0;">${u.name[0].toUpperCase()}</div>
+          <div id="pf_avatar_container" style="width:72px;height:72px;border:1px solid var(--border);border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            ${u.avatar_url
+              ? `<img id="pf_avatar_img" src="${u.avatar_url}" style="width:100%;height:100%;object-fit:cover;">`
+              : `<div id="pf_avatar_txt" style="width:100%;height:100%;background:var(--gold-dim);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:32px;color:var(--gold);">${u.name[0].toUpperCase()}</div>`
+            }
+          </div>
           <div>
             <div style="font-family:'Cormorant Garamond',serif;font-size:24px;color:var(--text)">${u.name}</div>
             <div style="color:var(--text-muted);font-size:12px;">${u.email}</div>
             <div style="margin-top:6px;">${roleBadge(u.role)}</div>
+            <div style="margin-top:10px;display:flex;gap:8px;">
+              <input type="file" id="pf_avatar_file" accept="image/*" style="display:none;" onchange="previewAvatar(event)">
+              <button class="btn btn-ghost btn-sm" onclick="document.getElementById('pf_avatar_file').click()">Upload Photo</button>
+              <button class="btn btn-danger btn-sm" id="btn_delete_avatar" style="display:${u.avatar_url ? 'inline-block' : 'none'}" onclick="markDeleteAvatar()">Remove Photo</button>
+            </div>
           </div>
         </div>
         <div class="form-grid">
@@ -1032,6 +1050,29 @@ async function loadProfile() {
     </div>`;
 }
 
+function previewAvatar(e) {
+  const file = e.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(event) {
+      const container = document.getElementById('pf_avatar_container');
+      container.innerHTML = `<img id="pf_avatar_img" src="${event.target.result}" style="width:100%;height:100%;object-fit:cover;">`;
+      document.getElementById('btn_delete_avatar').style.display = 'inline-block';
+      window._deleteAvatar = false;
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+function markDeleteAvatar() {
+  window._deleteAvatar = true;
+  const container = document.getElementById('pf_avatar_container');
+  const name = val('pf_name') || CURRENT_USER.name;
+  container.innerHTML = `<div id="pf_avatar_txt" style="width:100%;height:100%;background:var(--gold-dim);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:32px;color:var(--gold);">${name[0].toUpperCase()}</div>`;
+  document.getElementById('btn_delete_avatar').style.display = 'none';
+  document.getElementById('pf_avatar_file').value = '';
+}
+
 async function saveProfile(id) {
   const pass = val('pf_pass');
   const pass2 = val('pf_pass2');
@@ -1041,17 +1082,47 @@ async function saveProfile(id) {
     if (pass.length < 8) { alertEl.innerHTML = '<div class="alert alert-error">Password must be at least 8 characters.</div>'; return; }
     if (pass !== pass2) { alertEl.innerHTML = '<div class="alert alert-error">Passwords do not match.</div>'; return; }
   }
-  const body = { id, name: val('pf_name'), phone: val('pf_phone'), address: val('pf_addr') };
-  if (pass) body.password = pass;
-  const res = await api('users.php', 'PUT', body);
-  if (res.success) {
-    alertEl.innerHTML = '<div class="alert alert-success">Profile updated successfully!</div>';
-    CURRENT_USER.name = val('pf_name');
-    document.getElementById('sidebarName').textContent = CURRENT_USER.name;
-    document.getElementById('sidebarAvatar').textContent = CURRENT_USER.name[0].toUpperCase();
-    toast('Profile saved!', 'success');
-  } else {
-    alertEl.innerHTML = `<div class="alert alert-error">${res.error}</div>`;
+
+  const fd = new FormData();
+  fd.append('id', id);
+  fd.append('name', val('pf_name'));
+  fd.append('phone', val('pf_phone'));
+  fd.append('address', val('pf_addr'));
+  if (pass) fd.append('password', pass);
+  if (window._deleteAvatar) fd.append('delete_avatar', '1');
+
+  const fileInput = document.getElementById('pf_avatar_file');
+  if (fileInput && fileInput.files[0]) {
+    fd.append('avatar', fileInput.files[0]);
+  }
+
+  try {
+    const res = await fetch('api/users.php', {
+      method: 'POST',
+      body: fd
+    });
+    if (res.status === 401) {
+      window.location.href = 'index.php?route=login';
+      return;
+    }
+    const data = await res.json();
+    if (data.success) {
+      alertEl.innerHTML = '<div class="alert alert-success">Profile updated successfully!</div>';
+      
+      // Refresh current session state in JS and update sidebar
+      const sessRes = await fetch('api/session.php');
+      const sessData = await sessRes.json();
+      if (sessData.loggedIn) {
+        CURRENT_USER = sessData.user;
+        renderSidebar();
+      }
+      toast('Profile saved!', 'success');
+      loadProfile();
+    } else {
+      alertEl.innerHTML = `<div class="alert alert-error">${data.error}</div>`;
+    }
+  } catch (e) {
+    alertEl.innerHTML = '<div class="alert alert-error">Server error. Please try again.</div>';
   }
 }
 

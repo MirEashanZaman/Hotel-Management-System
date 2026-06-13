@@ -67,20 +67,22 @@ class AuthController extends BaseController {
             $this->jsonResponse(['error' => 'Invalid email or password']);
         }
 
-        $_SESSION['user_id'] = $user['id'];
-        $_SESSION['name']    = $user['name'];
-        $_SESSION['role']    = $user['role'];
-        $_SESSION['email']   = $user['email'];
+        $_SESSION['user_id']    = $user['id'];
+        $_SESSION['name']       = $user['name'];
+        $_SESSION['role']       = $user['role'];
+        $_SESSION['email']      = $user['email'];
+        $_SESSION['avatar_url'] = $user['avatar_url'] ?? null;
 
         $this->logActivity($user['id'], 'Login', 'User logged in from ' . ($_SERVER['REMOTE_ADDR'] ?? ''));
 
         $this->jsonResponse([
             'success' => true,
             'user' => [
-                'id'    => $user['id'],
-                'name'  => $user['name'],
-                'role'  => $user['role'],
-                'email' => $user['email']
+                'id'         => $user['id'],
+                'name'       => $user['name'],
+                'role'       => $user['role'],
+                'email'      => $user['email'],
+                'avatar_url' => $user['avatar_url'] ?? null
             ]
         ]);
     }

@@ -1,14 +1,14 @@
 <?php
 class User extends BaseModel {
     public function findByEmail($email) {
-        $stmt = $this->db->prepare("SELECT id, name, email, password, role FROM users WHERE email = ?");
+        $stmt = $this->db->prepare("SELECT id, name, email, password, role, avatar_url FROM users WHERE email = ?");
         $stmt->bind_param("s", $email);
         $stmt->execute();
         return $stmt->get_result()->fetch_assoc();
     }
 
     public function findById($id) {
-        $stmt = $this->db->prepare("SELECT id, name, email, role, phone, address, created_at FROM users WHERE id = ?");
+        $stmt = $this->db->prepare("SELECT id, name, email, role, phone, address, avatar_url, created_at FROM users WHERE id = ?");
         $stmt->bind_param("i", $id);
         $stmt->execute();
         return $stmt->get_result()->fetch_assoc();
@@ -30,15 +30,35 @@ class User extends BaseModel {
         return false;
     }
 
-    public function update($id, $name, $phone, $address, $hashedPassword = null) {
-        if ($hashedPassword) {
-            $stmt = $this->db->prepare("UPDATE users SET name=?, phone=?, address=?, password=? WHERE id=?");
-            $stmt->bind_param("ssssi", $name, $phone, $address, $hashedPassword, $id);
+    public function update($id, $name, $phone, $address, $hashedPassword = null, $avatarUrl = null, $deleteAvatar = false) {
+        if ($deleteAvatar) {
+            $user = $this->findById($id);
+            if ($user && $user['avatar_url'] && file_exists(__DIR__ . '/../' . $user['avatar_url'])) {
+                @unlink(__DIR__ . '/../' . $user['avatar_url']);
+            }
+            $stmt = $this->db->prepare("UPDATE users SET name=?, phone=?, address=?, avatar_url=NULL WHERE id=?");
+            $stmt->bind_param("sssi", $name, $phone, $address, $id);
+            $stmt->execute();
+        } elseif ($avatarUrl) {
+            $user = $this->findById($id);
+            if ($user && $user['avatar_url'] && file_exists(__DIR__ . '/../' . $user['avatar_url'])) {
+                @unlink(__DIR__ . '/../' . $user['avatar_url']);
+            }
+            $stmt = $this->db->prepare("UPDATE users SET name=?, phone=?, address=?, avatar_url=? WHERE id=?");
+            $stmt->bind_param("ssssi", $name, $phone, $address, $avatarUrl, $id);
+            $stmt->execute();
         } else {
             $stmt = $this->db->prepare("UPDATE users SET name=?, phone=?, address=? WHERE id=?");
             $stmt->bind_param("sssi", $name, $phone, $address, $id);
+            $stmt->execute();
         }
-        return $stmt->execute();
+
+        if ($hashedPassword) {
+            $stmt = $this->db->prepare("UPDATE users SET password=? WHERE id=?");
+            $stmt->bind_param("si", $hashedPassword, $id);
+            $stmt->execute();
+        }
+        return true;
     }
 
     public function delete($id) {

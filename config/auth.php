@@ -28,10 +28,11 @@ function requireRole($roles) {
 
 function currentUser() {
     return [
-        'id'    => $_SESSION['user_id'] ?? null,
-        'name'  => $_SESSION['name']    ?? null,
-        'role'  => $_SESSION['role']    ?? null,
-        'email' => $_SESSION['email']   ?? null,
+        'id'         => $_SESSION['user_id']    ?? null,
+        'name'       => $_SESSION['name']       ?? null,
+        'role'       => $_SESSION['role']       ?? null,
+        'email'      => $_SESSION['email']      ?? null,
+        'avatar_url' => $_SESSION['avatar_url'] ?? null,
     ];
 }
 

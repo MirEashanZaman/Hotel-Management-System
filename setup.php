@@ -14,6 +14,15 @@ if ($colCheck->num_rows === 0) {
     }
 }
 
+$userColCheck = $conn->query("SHOW COLUMNS FROM users LIKE 'avatar_url'");
+if ($userColCheck->num_rows === 0) {
+    if ($conn->query("ALTER TABLE users ADD COLUMN avatar_url VARCHAR(255) DEFAULT NULL")) {
+        $success[] = "✓ Added avatar_url column to users table.";
+    } else {
+        $errors[] = "✗ Failed to add avatar_url column: " . $conn->error;
+    }
+}
+
 $hash = password_hash('12345678', PASSWORD_DEFAULT);
 
 $wrongHash = '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi';

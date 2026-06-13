@@ -9,6 +9,7 @@ CREATE TABLE users (
     role ENUM('admin','staff','customer') NOT NULL DEFAULT 'customer',
     phone VARCHAR(20),
     address TEXT,
+    avatar_url VARCHAR(255) DEFAULT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
