@@ -1,5 +1,15 @@
 let CURRENT_USER = null;
 
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 const icons = {
   dashboard: `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>`,
   rooms: `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>`,
@@ -187,8 +197,8 @@ async function loadDashboard() {
           <tbody>
             ${stats.recent_bookings.map(b => `<tr>
               <td class="text-muted">#${b.id}</td>
-              <td class="name">${b.room_number} <span class="text-muted">(${b.room_type || ''})</span></td>
-              ${role !== 'customer' ? `<td>${b.customer_name}</td>` : ''}
+              <td class="name">${escapeHtml(b.room_number)} <span class="text-muted">(${escapeHtml(b.room_type || '')})</span></td>
+              ${role !== 'customer' ? `<td>${escapeHtml(b.customer_name)}</td>` : ''}
               <td>${formatDate(b.check_in)}</td>
               <td>${formatDate(b.check_out)}</td>
               <td>৳${Number(b.total_price).toLocaleString()}</td>
@@ -231,11 +241,11 @@ async function loadRooms() {
     <div class="room-wrap" data-status="${r.status}">
     <div class="card room-card" style="margin-bottom:0; position:relative; overflow:hidden; height:100%;">
       <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${r.status === 'available' ? 'var(--green)' : r.status === 'occupied' ? 'var(--orange)' : 'var(--red)'}"></div>
-      ${r.image_url ? `<div style="height:150px; width:100%; overflow:hidden; margin-bottom:12px; border-bottom: 1px solid var(--border);"><img src="${r.image_url}" style="width:100%; height:100%; object-fit:cover;"></div>` : ''}
+      ${r.image_url ? `<div style="height:150px; width:100%; overflow:hidden; margin-bottom:12px; border-bottom: 1px solid var(--border);"><img src="${escapeHtml(r.image_url)}" style="width:100%; height:100%; object-fit:cover;"></div>` : ''}
       <div class="d-flex justify-between align-center" style="margin-bottom:12px; padding: ${r.image_url ? '0 16px' : '0'};">
         <div>
-          <div style="font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--text)">Room ${r.room_number}</div>
-          <div style="font-size:10px;color:var(--text-muted);letter-spacing:1px;">Floor ${r.floor} · ${r.room_type}</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--text)">Room ${escapeHtml(r.room_number)}</div>
+          <div style="font-size:10px;color:var(--text-muted);letter-spacing:1px;">Floor ${escapeHtml(r.floor)} · ${escapeHtml(r.room_type)}</div>
         </div>
         <div style="text-align:right;">
           ${roomStatusBadge(r.status)}
@@ -243,8 +253,8 @@ async function loadRooms() {
         </div>
       </div>
       <div style="padding: ${r.image_url ? '0 16px 16px 16px' : '0'};">
-        <div style="font-size:11px;color:var(--text2);margin-bottom:8px;">${r.description || ''}</div>
-        <div style="font-size:10px;color:var(--text-muted);">${r.amenities || ''}</div>
+        <div style="font-size:11px;color:var(--text2);margin-bottom:8px;">${escapeHtml(r.description || '')}</div>
+        <div style="font-size:10px;color:var(--text-muted);">${escapeHtml(r.amenities || '')}</div>
         <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
           ${canEdit ? `<button class="btn btn-ghost btn-sm" onclick="openRoomModal(${r.id})">Edit</button>` : ''}
           ${isCustomer && r.status === 'available' ? `<button class="btn btn-primary btn-sm" onclick="openBookingModal(${r.id})">Book Now</button>` : ''}
@@ -269,7 +279,7 @@ async function openRoomModal(id = null) {
   if (id) { room = await api(`rooms.php?id=${id}`); }
   openModal(id ? 'Edit Room' : 'Add Room', `
     <div class="form-grid">
-      ${!id ? `<div class="form-group"><label>Room Number</label><input id="f_rno" value="${room.room_number || ''}"></div>` : ''}
+      ${!id ? `<div class="form-group"><label>Room Number</label><input id="f_rno" value="${escapeHtml(room.room_number || '')}"></div>` : ''}
       <div class="form-group"><label>Type</label>
         <select id="f_rtype">
           ${['Single', 'Double', 'Suite', 'Deluxe'].map(t => `<option ${room.room_type === t ? 'selected' : ''}>${t}</option>`).join('')}
@@ -283,8 +293,8 @@ async function openRoomModal(id = null) {
           ${['available', 'occupied', 'maintenance'].map(s => `<option ${room.status === s ? 'selected' : ''}>${s}</option>`).join('')}
         </select>
       </div>
-      <div class="form-group form-col-span"><label>Description</label><textarea id="f_rdesc">${room.description || ''}</textarea></div>
-      <div class="form-group form-col-span"><label>Amenities</label><input id="f_rame" value="${room.amenities || ''}"></div>
+      <div class="form-group form-col-span"><label>Description</label><textarea id="f_rdesc">${escapeHtml(room.description || '')}</textarea></div>
+      <div class="form-group form-col-span"><label>Amenities</label><input id="f_rame" value="${escapeHtml(room.amenities || '')}"></div>
       <div class="form-group form-col-span">
         <label>Room Picture</label>
         <input type="file" id="f_rimage" accept="image/*">
@@ -382,8 +392,8 @@ async function loadBookings() {
 
     return `<tr>
           <td class="text-muted">#${b.id}</td>
-          ${canManage ? `<td class="name">${b.customer_name || '—'}</td>` : ''}
-          <td class="name">${b.room_number} <span class="text-muted">(${b.room_type})</span></td>
+          ${canManage ? `<td class="name">${escapeHtml(b.customer_name || '—')}</td>` : ''}
+          <td class="name">${escapeHtml(b.room_number)} <span class="text-muted">(${escapeHtml(b.room_type)})</span></td>
           <td>${formatDate(b.check_in)}</td>
           <td>${formatDate(b.check_out)}</td>
           <td>${nights}</td>
@@ -411,7 +421,7 @@ async function openNewBookingModal() {
     <div class="form-grid">
       <div class="form-group form-col-span"><label>Customer</label>
         <select id="f_bcust">
-          ${customerList.map(c => `<option value="${c.id}">${c.name} (${c.email})</option>`).join('')}
+          ${customerList.map(c => `<option value="${c.id}">${escapeHtml(c.name)} (${escapeHtml(c.email)})</option>`).join('')}
         </select>
       </div>
       <div class="form-group form-col-span"><label>Room</label>
@@ -432,11 +442,11 @@ async function openNewBookingModal() {
 
 async function openBookingModal(roomId) {
   const room = await api(`rooms.php?id=${roomId}`);
-  openModal('Book Room ' + room.room_number, `
+  openModal('Book Room ' + escapeHtml(room.room_number), `
     <div style="background:var(--dark4);border:1px solid var(--border);padding:16px;margin-bottom:20px;">
-      <div style="font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--text)">Room ${room.room_number} — ${room.room_type}</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--text)">Room ${escapeHtml(room.room_number)} — ${escapeHtml(room.room_type)}</div>
       <div style="color:var(--gold);font-size:18px;margin-top:4px;">৳${Number(room.price_per_night).toLocaleString()} / night</div>
-      <div style="color:var(--text-muted);font-size:11px;margin-top:6px;">${room.amenities}</div>
+      <div style="color:var(--text-muted);font-size:11px;margin-top:6px;">${escapeHtml(room.amenities)}</div>
     </div>
     <div class="form-grid">
       <div class="form-group"><label>Check In</label><input type="date" id="f_bcin" min="${today()}" onchange="calcTotal(${room.price_per_night})"></div>
@@ -494,8 +504,8 @@ async function openBookingDetail(id) {
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
       <div style="background:var(--dark4);border:1px solid var(--border);padding:16px;">
         <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:8px;">Room</div>
-        <div style="font-size:18px;color:var(--text)">Room ${b.room_number}</div>
-        <div style="color:var(--text-muted);font-size:11px;">${b.room_type} · ৳${b.price_per_night}/night</div>
+        <div style="font-size:18px;color:var(--text)">Room ${escapeHtml(b.room_number)}</div>
+        <div style="color:var(--text-muted);font-size:11px;">${escapeHtml(b.room_type)} · ৳${b.price_per_night}/night</div>
       </div>
       <div style="background:var(--dark4);border:1px solid var(--border);padding:16px;">
         <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:8px;">Status</div>
@@ -506,14 +516,14 @@ async function openBookingDetail(id) {
     ${CURRENT_USER.role !== 'customer' ? `
     <div style="background:var(--dark4);border:1px solid var(--border);padding:16px;margin-bottom:16px;">
       <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:8px;">Customer</div>
-      <div style="color:var(--text)">${b.customer_name}</div>
-      <div style="color:var(--text-muted);font-size:11px;">${b.customer_email} · ${b.customer_phone || '—'}</div>
+      <div style="color:var(--text)">${escapeHtml(b.customer_name)}</div>
+      <div style="color:var(--text-muted);font-size:11px;">${escapeHtml(b.customer_email)} · ${escapeHtml(b.customer_phone || '—')}</div>
     </div>` : ''}
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
       <div><div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Check In</div><div style="color:var(--text)">${formatDate(b.check_in)}</div></div>
       <div><div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Check Out</div><div style="color:var(--text)">${formatDate(b.check_out)}</div></div>
     </div>
-    ${b.special_requests ? `<div style="background:var(--dark4);border:1px solid var(--border);padding:14px;"><div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Special Requests</div><div style="color:var(--text2);font-size:12px;">${b.special_requests}</div></div>` : ''}
+    ${b.special_requests ? `<div style="background:var(--dark4);border:1px solid var(--border);padding:14px;"><div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Special Requests</div><div style="color:var(--text2);font-size:12px;">${escapeHtml(b.special_requests)}</div></div>` : ''}
   `);
 }
 
@@ -573,8 +583,8 @@ async function loadPayments() {
         : '<span class="text-muted">—</span>';
       return `<tr>
         <td class="text-muted">#${p.id}</td>
-        <td class="name">${p.customer_name || '—'}</td>
-        <td>${p.room_number || '—'}</td>
+        <td class="name">${escapeHtml(p.customer_name || '—')}</td>
+        <td>${escapeHtml(p.room_number || '—')}</td>
         <td>#${p.booking_id}</td>
         <td>৳${Number(p.amount).toLocaleString()}</td>
         <td>${methodBadge}</td>
@@ -616,7 +626,7 @@ async function loadPayments() {
 
       return `<tr>
         <td class="text-muted">#${b.id}</td>
-        <td class="name">${b.room_number} <span class="text-muted">(${b.room_type})</span></td>
+        <td class="name">${escapeHtml(b.room_number)} <span class="text-muted">(${escapeHtml(b.room_type)})</span></td>
         <td>${formatDate(b.check_in)} → ${formatDate(b.check_out)}</td>
         <td>৳${Number(amount).toLocaleString()}</td>
         <td>${methodBadge}</td>
@@ -740,7 +750,7 @@ async function openPaymentModal() {
     <div class="form-grid">
       <div class="form-group form-col-span"><label>Booking</label>
         <select id="f_pbid">
-          ${active.map(b => `<option value="${b.id}">#${b.id} - ${b.customer_name || ''} - Room ${b.room_number} - ৳${Number(b.total_price).toLocaleString()}</option>`).join('')}
+          ${active.map(b => `<option value="${b.id}">#${b.id} - ${escapeHtml(b.customer_name || '')} - Room ${escapeHtml(b.room_number)} - ৳${Number(b.total_price).toLocaleString()}</option>`).join('')}
         </select>
       </div>
       <div class="form-group"><label>Amount (৳)</label><input id="f_pamount" type="number"></div>
@@ -782,13 +792,13 @@ async function loadServices() {
     <div class="card" style="margin-bottom:0;">
       <div class="d-flex justify-between align-center">
         <div>
-          <div style="color:var(--text);font-weight:500;">${s.name}</div>
-          <div style="font-size:11px;color:var(--text-muted);margin-top:3px;">${s.description || ''}</div>
-          <span class="badge badge-muted" style="margin-top:8px;font-size:8px;">${s.category}</span>
+          <div style="color:var(--text);font-weight:500;">${escapeHtml(s.name)}</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:3px;">${escapeHtml(s.description || '')}</div>
+          <span class="badge badge-muted" style="margin-top:8px;font-size:8px;">${escapeHtml(s.category)}</span>
         </div>
         <div style="text-align:right;">
           <div style="font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--gold)">৳${Number(s.price).toLocaleString()}</div>
-          ${role === 'customer' ? `<button class="btn btn-primary btn-sm" style="margin-top:8px;" onclick="requestService(${s.id},'${s.name}')">Request</button>` : ''}
+          ${role === 'customer' ? `<button class="btn btn-primary btn-sm" style="margin-top:8px;" onclick="requestService(${s.id},'${escapeHtml(s.name)}')">Request</button>` : ''}
         </div>
       </div>
     </div>`).join('');
@@ -802,8 +812,8 @@ async function loadServices() {
       <tbody>
         ${requests.length ? requests.map(r => `<tr>
           <td class="text-muted">#${r.id}</td>
-          ${canManage ? `<td class="name">${r.customer_name || '—'}</td>` : ''}
-          <td class="name">${r.service_name}</td>
+          ${canManage ? `<td class="name">${escapeHtml(r.customer_name || '—')}</td>` : ''}
+          <td class="name">${escapeHtml(r.service_name)}</td>
           <td>#${r.booking_id}</td>
           <td>${r.quantity}</td>
           <td>${serviceStatusBadge(r.status)}</td>
@@ -826,11 +836,11 @@ async function requestService(serviceId, serviceName) {
   const bookings = await api('bookings.php');
   const active = bookings.filter(b => ['confirmed', 'checked_in'].includes(b.status));
   if (!active.length) { toast('No active bookings to request service for.', 'error'); return; }
-  openModal(`Request: ${serviceName}`, `
+  openModal(`Request: ${escapeHtml(serviceName)}`, `
     <div class="form-grid">
       <div class="form-group form-col-span"><label>Booking</label>
         <select id="f_srbid">
-          ${active.map(b => `<option value="${b.id}">#${b.id} - Room ${b.room_number}</option>`).join('')}
+          ${active.map(b => `<option value="${b.id}">#${b.id} - Room ${escapeHtml(b.room_number)}</option>`).join('')}
         </select>
       </div>
       <div class="form-group"><label>Quantity</label><input id="f_srqty" type="number" value="1" min="1"></div>
@@ -889,10 +899,10 @@ async function loadUsers() {
     <tbody>
       ${visible.map(u => `<tr>
         <td class="text-muted">${u.id}</td>
-        <td class="name">${u.name}</td>
-        <td style="color:var(--text2)">${u.email}</td>
+        <td class="name">${escapeHtml(u.name)}</td>
+        <td style="color:var(--text2)">${escapeHtml(u.email)}</td>
         <td>${roleBadge(u.role)}</td>
-        <td style="color:var(--text-muted)">${u.phone || '—'}</td>
+        <td style="color:var(--text-muted)">${escapeHtml(u.phone || '—')}</td>
         <td style="font-size:11px;color:var(--text-muted)">${formatDate(u.created_at)}</td>
         <td>
           ${(role === 'admin' || (role === 'staff' && u.role === 'customer') || u.id == CURRENT_USER.id)
@@ -954,12 +964,12 @@ async function saveNewUser(role) {
 
 async function openEditUserModal(id) {
   const u = await api(`users.php?id=${id}`);
-  openModal('Edit User: ' + u.name, `
+  openModal('Edit User: ' + escapeHtml(u.name), `
     <div class="form-grid">
-      <div class="form-group form-col-span"><label>Full Name</label><input id="f_uname" value="${u.name}"></div>
-      <div class="form-group form-col-span"><label>Email <span style="color:var(--text-muted);font-size:9px">(cannot change)</span></label><input value="${u.email}" disabled style="opacity:0.5"></div>
-      <div class="form-group"><label>Phone</label><input id="f_uphone" value="${u.phone || ''}"></div>
-      <div class="form-group"><label>Address</label><input id="f_uaddr" value="${u.address || ''}"></div>
+      <div class="form-group form-col-span"><label>Full Name</label><input id="f_uname" value="${escapeHtml(u.name)}"></div>
+      <div class="form-group form-col-span"><label>Email <span style="color:var(--text-muted);font-size:9px">(cannot change)</span></label><input value="${escapeHtml(u.email)}" disabled style="opacity:0.5"></div>
+      <div class="form-group"><label>Phone</label><input id="f_uphone" value="${escapeHtml(u.phone || '')}"></div>
+      <div class="form-group"><label>Address</label><input id="f_uaddr" value="${escapeHtml(u.address || '')}"></div>
       <div class="form-group"><label>New Password <span style="color:var(--text-muted);font-size:9px">(min 8 chars, leave blank to keep)</span></label><input id="f_upass" type="password" placeholder="Leave blank to keep"></div>
     </div>
     <div class="form-actions">
@@ -996,11 +1006,11 @@ async function loadLogs() {
         <tbody>
           ${logs.map(l => `<tr>
             <td class="text-muted">${l.id}</td>
-            <td class="name">${l.user_name || 'System'}</td>
+            <td class="name">${escapeHtml(l.user_name || 'System')}</td>
             <td>${l.role ? roleBadge(l.role) : '—'}</td>
-            <td style="color:var(--text)">${l.action}</td>
-            <td style="color:var(--text-muted);font-size:11px;">${l.details || '—'}</td>
-            <td style="color:var(--text-muted);font-size:11px;">${l.ip_address || '—'}</td>
+            <td style="color:var(--text)">${escapeHtml(l.action)}</td>
+            <td style="color:var(--text-muted);font-size:11px;">${escapeHtml(l.details || '—')}</td>
+            <td style="color:var(--text-muted);font-size:11px;">${escapeHtml(l.ip_address || '—')}</td>
             <td style="font-size:11px;color:var(--text-muted)">${formatDateTime(l.logged_at)}</td>
           </tr>`).join('')}
         </tbody>
@@ -1017,13 +1027,13 @@ async function loadProfile() {
         <div style="display:flex;align-items:center;gap:20px;margin-bottom:28px;padding-bottom:24px;border-bottom:1px solid var(--border);">
           <div id="pf_avatar_container" style="width:72px;height:72px;border:1px solid var(--border);border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
             ${u.avatar_url
-              ? `<img id="pf_avatar_img" src="${u.avatar_url}" style="width:100%;height:100%;object-fit:cover;">`
-              : `<div id="pf_avatar_txt" style="width:100%;height:100%;background:var(--gold-dim);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:32px;color:var(--gold);">${u.name[0].toUpperCase()}</div>`
+              ? `<img id="pf_avatar_img" src="${escapeHtml(u.avatar_url)}" style="width:100%;height:100%;object-fit:cover;">`
+              : `<div id="pf_avatar_txt" style="width:100%;height:100%;background:var(--gold-dim);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:32px;color:var(--gold);">${escapeHtml(u.name[0].toUpperCase())}</div>`
             }
           </div>
           <div>
-            <div style="font-family:'Cormorant Garamond',serif;font-size:24px;color:var(--text)">${u.name}</div>
-            <div style="color:var(--text-muted);font-size:12px;">${u.email}</div>
+            <div style="font-family:'Cormorant Garamond',serif;font-size:24px;color:var(--text)">${escapeHtml(u.name)}</div>
+            <div style="color:var(--text-muted);font-size:12px;">${escapeHtml(u.email)}</div>
             <div style="margin-top:6px;">${roleBadge(u.role)}</div>
             <div style="margin-top:10px;display:flex;gap:8px;">
               <input type="file" id="pf_avatar_file" accept="image/*" style="display:none;" onchange="previewAvatar(event)">
@@ -1033,10 +1043,10 @@ async function loadProfile() {
           </div>
         </div>
         <div class="form-grid">
-          <div class="form-group form-col-span"><label>Full Name</label><input id="pf_name" value="${u.name}"></div>
-          <div class="form-group form-col-span"><label>Email <span style="color:var(--text-muted);font-size:9px">(cannot change)</span></label><input value="${u.email}" disabled style="opacity:0.5"></div>
-          <div class="form-group"><label>Phone</label><input id="pf_phone" value="${u.phone || ''}"></div>
-          <div class="form-group"><label>Address</label><input id="pf_addr" value="${u.address || ''}"></div>
+          <div class="form-group form-col-span"><label>Full Name</label><input id="pf_name" value="${escapeHtml(u.name)}"></div>
+          <div class="form-group form-col-span"><label>Email <span style="color:var(--text-muted);font-size:9px">(cannot change)</span></label><input value="${escapeHtml(u.email)}" disabled style="opacity:0.5"></div>
+          <div class="form-group"><label>Phone</label><input id="pf_phone" value="${escapeHtml(u.phone || '')}"></div>
+          <div class="form-group"><label>Address</label><input id="pf_addr" value="${escapeHtml(u.address || '')}"></div>
         </div>
         <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border);">
           <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:16px;">Change Password</div>
@@ -1199,9 +1209,9 @@ function reviewCard(r, isOwn) {
   return `<div style="border-bottom:1px solid var(--border2);padding:16px 0;">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
       <div>
-        <div style="font-size:13px;color:var(--text);font-weight:500;">${r.customer_name || 'Customer'}</div>
+        <div style="font-size:13px;color:var(--text);font-weight:500;">${escapeHtml(r.customer_name || 'Customer')}</div>
         <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">
-          Room ${r.room_number || '—'} · Booking #${r.booking_id} · ${formatDate(r.created_at)}
+          Room ${escapeHtml(r.room_number || '—')} · Booking #${r.booking_id} · ${formatDate(r.created_at)}
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:10px;">
@@ -1210,7 +1220,7 @@ function reviewCard(r, isOwn) {
         ${CURRENT_USER.role === 'admin' ? `<button class="btn btn-danger btn-sm" onclick="deleteReview(${r.id})">Delete</button>` : ''}
       </div>
     </div>
-    ${r.comment ? `<div style="font-size:12px;color:var(--text2);line-height:1.7;">${r.comment}</div>` : ''}
+    ${r.comment ? `<div style="font-size:12px;color:var(--text2);line-height:1.7;">${escapeHtml(r.comment)}</div>` : ''}
   </div>`;
 }
 
