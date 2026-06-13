@@ -119,6 +119,15 @@
     document.getElementById('successAmount').textContent = `৳${Number(amount).toLocaleString()}`;
     document.getElementById('successBooking').textContent = `Booking #${bookingId} · Room ${roomNum}`;
 
+    let csrfToken = '';
+    fetch('api/session.php')
+      .then(r => r.json())
+      .then(d => {
+        if (d.loggedIn) {
+          csrfToken = d.csrf_token;
+        }
+      });
+
     function goBack() {
       window.location.href = 'index.php?route=dashboard';
     }
@@ -189,7 +198,10 @@
       try {
         const res = await fetch('api/payments.php', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': csrfToken
+          },
           body: JSON.stringify({
             booking_id: parseInt(bookingId),
             amount: amount,

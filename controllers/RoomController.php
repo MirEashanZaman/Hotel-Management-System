@@ -27,6 +27,7 @@ class RoomController extends BaseController {
         }
 
         if ($method === 'POST') {
+            $this->checkCsrf();
             requireRole(['admin', 'staff']);
             $data = !empty($_POST) ? $_POST : $this->getInput();
             $id = intval($data['id'] ?? 0);
@@ -45,6 +46,7 @@ class RoomController extends BaseController {
                     $uploadFileDir = __DIR__ . '/../uploads/';
                     $dest_path = $uploadFileDir . $newFileName;
                     if (move_uploaded_file($fileTmpPath, $dest_path)) {
+                        $this->imageCompress($dest_path, $dest_path, 80);
                         $image_url = 'uploads/' . $newFileName;
                     }
                 }
@@ -92,6 +94,7 @@ class RoomController extends BaseController {
         }
 
         if ($method === 'PUT') {
+            $this->checkCsrf();
             requireRole(['admin', 'staff']);
             $data = $this->getInput();
             $id          = intval($data['id'] ?? 0);
@@ -112,6 +115,7 @@ class RoomController extends BaseController {
         }
 
         if ($method === 'DELETE') {
+            $this->checkCsrf();
             requireRole(['admin', 'staff']);
             $data = $this->getInput();
             $id = intval($data['id'] ?? 0);

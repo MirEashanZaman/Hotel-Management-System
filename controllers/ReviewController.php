@@ -27,6 +27,7 @@ class ReviewController extends BaseController {
         }
 
         if ($method === 'POST') {
+            $this->checkCsrf();
             if ($me['role'] !== 'customer') {
                 $this->jsonResponse(['error' => 'Only customers can post reviews']);
             }
@@ -67,6 +68,7 @@ class ReviewController extends BaseController {
         }
 
         if ($method === 'DELETE') {
+            $this->checkCsrf();
             $data = $this->getInput();
             $id   = intval($data['id'] ?? 0);
 

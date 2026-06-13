@@ -37,6 +37,7 @@ class UserController extends BaseController {
         }
 
         if ($method === 'POST') {
+            $this->checkCsrf();
             $data = !empty($_POST) ? $_POST : $this->getInput();
             $targetId = intval($data['id'] ?? 0);
 
@@ -78,6 +79,7 @@ class UserController extends BaseController {
                         $uploadFileDir = __DIR__ . '/../uploads/';
                         $dest_path = $uploadFileDir . $newFileName;
                         if (move_uploaded_file($fileTmpPath, $dest_path)) {
+                            $this->imageCompress($dest_path, $dest_path, 80);
                             $avatar_url = 'uploads/' . $newFileName;
                         }
                     }
@@ -149,6 +151,7 @@ class UserController extends BaseController {
         }
 
         if ($method === 'PUT') {
+            $this->checkCsrf();
             $data     = $this->getInput();
             $targetId = intval($data['id'] ?? 0);
 
@@ -191,6 +194,7 @@ class UserController extends BaseController {
         }
 
         if ($method === 'DELETE') {
+            $this->checkCsrf();
             requireRole('admin');
             $data     = $this->getInput();
             $targetId = intval($data['id'] ?? 0);

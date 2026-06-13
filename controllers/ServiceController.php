@@ -29,6 +29,7 @@ class ServiceController extends BaseController {
         }
 
         if ($method === 'POST') {
+            $this->checkCsrf();
             $data = $this->getInput();
             $type = $data['type'] ?? 'request';
 
@@ -68,6 +69,7 @@ class ServiceController extends BaseController {
         }
 
         if ($method === 'PUT') {
+            $this->checkCsrf();
             requireRole(['admin', 'staff']);
             $data = $this->getInput();
             $id     = intval($data['id'] ?? 0);

@@ -36,6 +36,7 @@ class BookingController extends BaseController {
         }
 
         if ($method === 'POST') {
+            $this->checkCsrf();
             $data = $this->getInput();
 
             if ($me['role'] === 'customer') {
@@ -87,6 +88,7 @@ class BookingController extends BaseController {
         }
 
         if ($method === 'PUT') {
+            $this->checkCsrf();
             $data = $this->getInput();
             $id = intval($data['id'] ?? 0);
 
@@ -123,6 +125,7 @@ class BookingController extends BaseController {
         }
 
         if ($method === 'DELETE') {
+            $this->checkCsrf();
             requireRole('admin');
             $data = $this->getInput();
             $id = intval($data['id'] ?? 0);

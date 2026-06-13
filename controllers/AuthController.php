@@ -8,7 +8,7 @@ class AuthController extends BaseController {
 
     public function session() {
         if (isLoggedIn()) {
-            $this->jsonResponse(['loggedIn' => true, 'user' => $this->me()]);
+            $this->jsonResponse(['loggedIn' => true, 'user' => $this->me(), 'csrf_token' => generateCsrfToken()]);
         } else {
             $this->jsonResponse(['loggedIn' => false]);
         }
@@ -72,11 +72,14 @@ class AuthController extends BaseController {
         $_SESSION['role']       = $user['role'];
         $_SESSION['email']      = $user['email'];
         $_SESSION['avatar_url'] = $user['avatar_url'] ?? null;
+        
+        $token = generateCsrfToken();
 
         $this->logActivity($user['id'], 'Login', 'User logged in from ' . ($_SERVER['REMOTE_ADDR'] ?? ''));
 
         $this->jsonResponse([
             'success' => true,
+            'csrf_token' => $token,
             'user' => [
                 'id'         => $user['id'],
                 'name'       => $user['name'],

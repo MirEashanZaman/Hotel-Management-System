@@ -21,6 +21,7 @@ async function init() {
       return;
     }
     CURRENT_USER = data.user;
+    window._csrfToken = data.csrf_token;
     renderSidebar();
     updateClock();
     setInterval(updateClock, 1000);
@@ -318,6 +319,9 @@ async function saveRoom(id) {
   try {
     const res = await fetch('api/rooms.php', {
       method: 'POST',
+      headers: {
+        'X-CSRF-Token': window._csrfToken || ''
+      },
       body: fd
     });
     if (res.status === 401) {
@@ -1098,6 +1102,9 @@ async function saveProfile(id) {
   try {
     const res = await fetch('api/users.php', {
       method: 'POST',
+      headers: {
+        'X-CSRF-Token': window._csrfToken || ''
+      },
       body: fd
     });
     if (res.status === 401) {
@@ -1113,6 +1120,7 @@ async function saveProfile(id) {
       const sessData = await sessRes.json();
       if (sessData.loggedIn) {
         CURRENT_USER = sessData.user;
+        window._csrfToken = sessData.csrf_token;
         renderSidebar();
       }
       toast('Profile saved!', 'success');
@@ -1247,7 +1255,11 @@ async function logout() {
 }
 
 async function api(endpoint, method = 'GET', body = null) {
-  const opts = { method, headers: { 'Content-Type': 'application/json' } };
+  const headers = { 'Content-Type': 'application/json' };
+  if (method !== 'GET') {
+    headers['X-CSRF-Token'] = window._csrfToken || '';
+  }
+  const opts = { method, headers };
   if (body) opts.body = JSON.stringify(body);
   const res = await fetch(`api/${endpoint}`, opts);
   if (res.status === 401) {

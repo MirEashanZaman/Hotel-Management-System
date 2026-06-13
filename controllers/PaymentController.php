@@ -31,6 +31,7 @@ class PaymentController extends BaseController {
         }
 
         if ($method === 'POST') {
+            $this->checkCsrf();
             $data          = $this->getInput();
             $bookingId     = intval($data['booking_id']     ?? 0);
             $amount        = floatval($data['amount']        ?? 0);
@@ -73,6 +74,7 @@ class PaymentController extends BaseController {
         }
 
         if ($method === 'PUT') {
+            $this->checkCsrf();
             requireRole(['admin', 'staff']);
             $data      = $this->getInput();
             $id        = intval($data['id'] ?? 0);

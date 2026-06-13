@@ -5,43 +5,43 @@ require_once 'config/db.php';
 $errors = [];
 $success = [];
 
-$colCheck = $conn->query("SHOW COLUMNS FROM rooms LIKE 'image_url'");
-if ($colCheck->num_rows === 0) {
-    if ($conn->query("ALTER TABLE rooms ADD COLUMN image_url VARCHAR(255) DEFAULT NULL")) {
+$colCheck = $conn->query("SHOW COLUMNS FROM rooms LIKE 'image_url'")->fetch();
+if (!$colCheck) {
+    try {
+        $conn->query("ALTER TABLE rooms ADD COLUMN image_url VARCHAR(255) DEFAULT NULL");
         $success[] = "✓ Added image_url column to rooms table.";
-    } else {
-        $errors[] = "✗ Failed to add image_url column: " . $conn->error;
+    } catch (PDOException $e) {
+        $errors[] = "✗ Failed to add image_url column: " . $e->getMessage();
     }
 }
 
-$userColCheck = $conn->query("SHOW COLUMNS FROM users LIKE 'avatar_url'");
-if ($userColCheck->num_rows === 0) {
-    if ($conn->query("ALTER TABLE users ADD COLUMN avatar_url VARCHAR(255) DEFAULT NULL")) {
+$userColCheck = $conn->query("SHOW COLUMNS FROM users LIKE 'avatar_url'")->fetch();
+if (!$userColCheck) {
+    try {
+        $conn->query("ALTER TABLE users ADD COLUMN avatar_url VARCHAR(255) DEFAULT NULL");
         $success[] = "✓ Added avatar_url column to users table.";
-    } else {
-        $errors[] = "✗ Failed to add avatar_url column: " . $conn->error;
+    } catch (PDOException $e) {
+        $errors[] = "✗ Failed to add avatar_url column: " . $e->getMessage();
     }
 }
 
 $hash = password_hash('12345678', PASSWORD_DEFAULT);
 
-$wrongHash = '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi';
 $stmt = $conn->prepare("UPDATE users SET password = ? WHERE email IN ('eshan@admin.com','milton@gmail.com','tanjim@gmail.com')");
-$stmt->bind_param("s", $hash);
-if ($stmt->execute() && $stmt->affected_rows > 0) {
+if ($stmt->execute([$hash]) && $stmt->rowCount() > 0) {
     $success[] = "✓ Passwords updated successfully for all 3 users.";
 } else {
     $errors[] = "✗ Password update failed or users not found. Make sure you imported hotel.sql first.";
 }
 
-$result = $conn->query("SELECT name, email, role FROM users ORDER BY id");
-$users = $result->fetch_all(MYSQLI_ASSOC);
+$stmt = $conn->query("SELECT name, email, role FROM users ORDER BY id");
+$users = $stmt->fetchAll();
 
 $tables = ['users','rooms','bookings','payments','services','service_requests','activity_logs'];
 $missing = [];
 foreach ($tables as $t) {
-    $r = $conn->query("SHOW TABLES LIKE '$t'");
-    if ($r->num_rows === 0) $missing[] = $t;
+    $r = $conn->query("SHOW TABLES LIKE '$t'")->fetch();
+    if (!$r) $missing[] = $t;
 }
 if (empty($missing)) {
     $success[] = "✓ All " . count($tables) . " tables present.";
@@ -49,7 +49,7 @@ if (empty($missing)) {
     $errors[] = "✗ Missing tables: " . implode(', ', $missing);
 }
 
-$roomCount = $conn->query("SELECT COUNT(*) c FROM rooms")->fetch_assoc()['c'];
+$roomCount = $conn->query("SELECT COUNT(*) c FROM rooms")->fetch()['c'];
 $success[] = "✓ $roomCount rooms in database.";
 
 ?>

@@ -2,9 +2,8 @@
 class Payment extends BaseModel {
     public function getByBookingId($bookingId) {
         $stmt = $this->db->prepare("SELECT p.*, b.customer_id FROM payments p JOIN bookings b ON p.booking_id = b.id WHERE p.booking_id = ?");
-        $stmt->bind_param("i", $bookingId);
-        $stmt->execute();
-        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $stmt->execute([$bookingId]);
+        return $stmt->fetchAll();
     }
 
     public function getByCustomer($customerId) {
@@ -15,9 +14,8 @@ class Payment extends BaseModel {
             JOIN rooms r ON b.room_id = r.id
             WHERE b.customer_id = ?
             ORDER BY p.created_at DESC");
-        $stmt->bind_param("i", $customerId);
-        $stmt->execute();
-        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $stmt->execute([$customerId]);
+        return $stmt->fetchAll();
     }
 
     public function getAll() {
@@ -29,38 +27,33 @@ class Payment extends BaseModel {
             JOIN users u ON b.customer_id = u.id
             JOIN rooms r ON b.room_id = r.id
             ORDER BY p.created_at DESC");
-        return $result->fetch_all(MYSQLI_ASSOC);
+        return $result->fetchAll();
     }
 
     public function findById($id) {
         $stmt = $this->db->prepare("SELECT * FROM payments WHERE id = ?");
-        $stmt->bind_param("i", $id);
-        $stmt->execute();
-        return $stmt->get_result()->fetch_assoc();
+        $stmt->execute([$id]);
+        return $stmt->fetch();
     }
 
     public function getExistingByBooking($bookingId) {
         $stmt = $this->db->prepare("SELECT id, payment_status FROM payments WHERE booking_id = ?");
-        $stmt->bind_param("i", $bookingId);
-        $stmt->execute();
-        return $stmt->get_result()->fetch_assoc();
+        $stmt->execute([$bookingId]);
+        return $stmt->fetch();
     }
 
     public function insert($bookingId, $amount, $paymentMethod, $paymentStatus, $transactionId, $paidAt) {
         $stmt = $this->db->prepare("INSERT INTO payments (booking_id, amount, payment_method, payment_status, transaction_id, paid_at) VALUES (?,?,?,?,?,?)");
-        $stmt->bind_param("idssss", $bookingId, $amount, $paymentMethod, $paymentStatus, $transactionId, $paidAt);
-        return $stmt->execute();
+        return $stmt->execute([$bookingId, $amount, $paymentMethod, $paymentStatus, $transactionId, $paidAt]);
     }
 
     public function updateByBooking($bookingId, $paymentMethod, $paymentStatus, $transactionId, $paidAt) {
         $stmt = $this->db->prepare("UPDATE payments SET payment_method=?, payment_status=?, transaction_id=?, paid_at=? WHERE booking_id=?");
-        $stmt->bind_param("ssssi", $paymentMethod, $paymentStatus, $transactionId, $paidAt, $bookingId);
-        return $stmt->execute();
+        return $stmt->execute([$paymentMethod, $paymentStatus, $transactionId, $paidAt, $bookingId]);
     }
 
     public function confirmCash($id, $paidAt) {
         $stmt = $this->db->prepare("UPDATE payments SET payment_status='paid', paid_at=? WHERE id=?");
-        $stmt->bind_param("si", $paidAt, $id);
-        return $stmt->execute();
+        return $stmt->execute([$paidAt, $id]);
     }
 }

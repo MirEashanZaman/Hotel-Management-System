@@ -39,6 +39,19 @@ function currentUser() {
 function logActivity($conn, $userId, $action, $details = '') {
     $ip   = $_SERVER['REMOTE_ADDR'] ?? '';
     $stmt = $conn->prepare("INSERT INTO activity_logs (user_id, action, details, ip_address) VALUES (?,?,?,?)");
-    $stmt->bind_param("isss", $userId, $action, $details, $ip);
-    $stmt->execute();
+    $stmt->execute([$userId, $action, $details, $ip]);
+}
+
+function generateCsrfToken() {
+    if (empty($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf_token'];
+}
+
+function validateCsrfToken($token) {
+    if (empty($_SESSION['csrf_token']) || empty($token)) {
+        return false;
+    }
+    return hash_equals($_SESSION['csrf_token'], $token);
 }
