@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hotel Management System</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+  <div class="app-layout">
+
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo">
+        <div class="logo-icon"><span>H</span></div>
+        <div class="logo-text">
+          <h2>Hotel Management</h2>
+          <p>System</p>
+        </div>
+      </div>
+
+      <div class="sidebar-user">
+        <div class="user-info">
+          <div class="user-avatar" id="sidebarAvatar">?</div>
+          <div>
+            <div class="user-name" id="sidebarName">Loading...</div>
+            <div class="user-role" id="sidebarRole">—</div>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav" id="sidebarNav">
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="btn-logout" onclick="logout()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
+          </svg>
+          Sign Out
+        </button>
+      </div>
+    </aside>
+
+    <div class="main-content">
+      <header class="topbar">
+        <div class="page-title" id="pageTitle">Dashboard</div>
+        <div class="topbar-actions">
+          <div style="font-size:11px; color:var(--text-muted);" id="topbarTime"></div>
+        </div>
+      </header>
+
+      <main class="page-content" id="pageContent">
+        <div style="text-align:center; padding:80px 0; color:var(--text-muted);">
+          <div style="font-size:32px; margin-bottom:12px;">⏳</div>
+          <p>Loading...</p>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalOverlay" onclick="closeModalOnBg(event)">
+    <div class="modal" id="modal">
+      <div class="modal-header">
+        <div class="modal-title" id="modalTitle">Modal</div>
+        <button class="modal-close" onclick="closeModal()">×</button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="js/app.js"></script>
+</body>
+
+</html>
