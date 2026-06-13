@@ -58,35 +58,12 @@ $success[] = "✓ $roomCount rooms in database.";
 <head>
 <meta charset="UTF-8">
 <title>Hotel Setup</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&display=swap');
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: #0d0d0d; color: #e8e0d0; font-family: 'Montserrat', sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
-  .box { background: #161616; border: 1px solid rgba(201,168,76,0.2); padding: 40px; max-width: 580px; width: 100%; }
-  h1 { font-size: 22px; color: #c9a84c; margin-bottom: 6px; }
-  p.sub { font-size: 11px; color: #5a5248; letter-spacing: 1px; margin-bottom: 28px; }
-  .msg { padding: 10px 14px; font-size: 12px; margin-bottom: 10px; border: 1px solid; }
-  .ok  { color: #4cc97a; border-color: rgba(76,201,122,0.3); background: rgba(76,201,122,0.07); }
-  .err { color: #e05a5a; border-color: rgba(224,90,90,0.3);  background: rgba(224,90,90,0.07); }
-  .section { margin-top: 24px; padding-top: 20px; border-top: 1px solid rgba(201,168,76,0.1); }
-  .section h2 { font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: #c9a84c; margin-bottom: 14px; }
-  table { width: 100%; border-collapse: collapse; }
-  th, td { padding: 9px 12px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 12px; }
-  th { color: #c9a84c; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; }
-  td { color: #b0a898; }
-  .badge { display: inline-block; padding: 2px 8px; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; border: 1px solid; }
-  .badge-gold  { color: #c9a84c; border-color: rgba(201,168,76,0.4); }
-  .badge-blue  { color: #4c8ec9; border-color: rgba(76,142,201,0.4); }
-  .badge-green { color: #4cc97a; border-color: rgba(76,201,122,0.4); }
-  .btn { display: inline-block; margin-top: 24px; padding: 13px 28px; border: 1px solid #c9a84c; color: #c9a84c; text-decoration: none; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; transition: all 0.2s; cursor: pointer; background: transparent; }
-  .btn:hover { background: #c9a84c; color: #0d0d0d; }
-  .warn { background: rgba(224,146,90,0.08); border: 1px solid rgba(224,146,90,0.3); color: #e0925a; padding: 12px 14px; font-size: 11px; margin-top: 20px; line-height: 1.7; }
-</style>
+<link rel="stylesheet" href="css/setup.css">
 </head>
 <body>
 <div class="box">
   <h1>Hotel Management System</h1>
-  <p class="sub">Setup & Initialization</p>
+  <p class="sub">Setup &amp; Initialization</p>
 
   <?php foreach ($success as $s): ?>
     <div class="msg ok"><?= $s ?></div>
@@ -110,7 +87,7 @@ $success[] = "✓ $roomCount rooms in database.";
               <?= $u['role'] ?>
             </span>
           </td>
-          <td style="color:#5a5248">12345678</td>
+          <td class="password-muted">12345678</td>
         </tr>
         <?php endforeach; ?>
       </tbody>
