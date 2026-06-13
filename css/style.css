@@ -290,6 +290,19 @@ body {
   margin-bottom: 28px;
 }
 
+.dashboard-charts-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+@media (max-width: 900px) {
+  .dashboard-charts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .stat-card {
   background: var(--dark3);
   border: 1px solid var(--border);
