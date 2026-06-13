@@ -81,6 +81,30 @@ class BookingController extends BaseController {
                     $this->roomModel->updateStatus($roomId, 'occupied');
                 }
                 $this->logActivity($me['id'], 'Create Booking', "Booking #$newId for room $roomId");
+                
+                // Send confirmation email
+                $userModel = new User();
+                $user = $userModel->findById($customerId);
+                if ($user) {
+                    $subject = "Booking Confirmation - Booking #$newId";
+                    $body = "
+                        <h2>Hello, " . htmlspecialchars($user['name']) . "!</h2>
+                        <p>Thank you for choosing Grand Palace Hotel. Your reservation is registered successfully.</p>
+                        <hr style='border: 0; border-top: 1px solid #eee; margin: 20px 0;'>
+                        <p><strong>Booking Details:</strong></p>
+                        <table style='width: 100%; font-size: 14px;'>
+                            <tr><td style='padding: 5px 0; color: #777;'>Booking Reference:</td><td style='font-weight: bold;'>#{$newId}</td></tr>
+                            <tr><td style='padding: 5px 0; color: #777;'>Room:</td><td style='font-weight: bold;'>Room " . htmlspecialchars($room['room_number']) . " (" . htmlspecialchars($room['room_type']) . ")</td></tr>
+                            <tr><td style='padding: 5px 0; color: #777;'>Check In:</td><td style='font-weight: bold;'>{$checkIn}</td></tr>
+                            <tr><td style='padding: 5px 0; color: #777;'>Check Out:</td><td style='font-weight: bold;'>{$checkOut}</td></tr>
+                            <tr><td style='padding: 5px 0; color: #777;'>Total Price:</td><td style='font-weight: bold; color: #c9a84c;'>৳" . number_format($total) . "</td></tr>
+                        </table>
+                        <p style='margin-top: 25px;'>If you have any special requirements, please feel free to contact us.</p>
+                        <p>We look forward to hosting you!</p>
+                    ";
+                    sendHotelMail($user['email'], $subject, $body);
+                }
+
                 $this->jsonResponse(['success' => true, 'id' => $newId, 'total_price' => $total]);
             } else {
                 $this->jsonResponse(['error' => 'Booking failed']);
@@ -118,6 +142,23 @@ class BookingController extends BaseController {
 
             if ($this->bookingModel->update($id, $status, $requests)) {
                 $this->logActivity($me['id'], 'Update Booking', "Updated booking #$id to $status");
+                
+                // Send update email
+                $subject = "Booking Status Updated - Booking #$id";
+                $body = "
+                    <h2>Hello, " . htmlspecialchars($booking['customer_name']) . "!</h2>
+                    <p>Your booking status has been updated to: <strong style='color: #c9a84c;'>" . str_replace('_', ' ', strtoupper($status)) . "</strong>.</p>
+                    <hr style='border: 0; border-top: 1px solid #eee; margin: 20px 0;'>
+                    <p><strong>Booking Details:</strong></p>
+                    <table style='width: 100%; font-size: 14px;'>
+                        <tr><td style='padding: 5px 0; color: #777;'>Booking Reference:</td><td style='font-weight: bold;'>#{$id}</td></tr>
+                        <tr><td style='padding: 5px 0; color: #777;'>Room:</td><td style='font-weight: bold;'>Room " . htmlspecialchars($booking['room_number']) . "</td></tr>
+                        <tr><td style='padding: 5px 0; color: #777;'>Check In:</td><td style='font-weight: bold;'>{$booking['check_in']}</td></tr>
+                        <tr><td style='padding: 5px 0; color: #777;'>Check Out:</td><td style='font-weight: bold;'>{$booking['check_out']}</td></tr>
+                    </table>
+                ";
+                sendHotelMail($booking['customer_email'], $subject, $body);
+
                 $this->jsonResponse(['success' => true]);
             } else {
                 $this->jsonResponse(['error' => 'Update failed']);

@@ -65,6 +65,22 @@ class PaymentController extends BaseController {
             if ($paymentMethod === 'card') {
                 $this->bookingModel->update($bookingId, 'confirmed', $booking['special_requests']);
                 $this->logActivity($me['id'], 'Payment', "Booking #$bookingId paid by card — auto confirmed");
+                
+                // Send email receipt
+                $subject = "Payment Receipt - Booking #$bookingId";
+                $body = "
+                    <h2>Hello, " . htmlspecialchars($booking['customer_name']) . "!</h2>
+                    <p>We have received your payment for Booking #$bookingId. Your booking is now <strong>CONFIRMED</strong>.</p>
+                    <hr style='border: 0; border-top: 1px solid #eee; margin: 20px 0;'>
+                    <p><strong>Payment details:</strong></p>
+                    <table style='width: 100%; font-size: 14px;'>
+                        <tr><td style='padding: 5px 0; color: #777;'>Amount:</td><td style='font-weight: bold; color: #4cc97a;'>৳" . number_format($amount) . "</td></tr>
+                        <tr><td style='padding: 5px 0; color: #777;'>Method:</td><td style='font-weight: bold;'>Credit Card</td></tr>
+                        <tr><td style='padding: 5px 0; color: #777;'>Transaction ID:</td><td style='font-weight: bold;'>{$txId}</td></tr>
+                    </table>
+                ";
+                sendHotelMail($booking['customer_email'], $subject, $body);
+
                 $this->jsonResponse(['success' => true, 'status' => 'confirmed', 'message' => 'Card payment successful. Booking confirmed!']);
             } else {
                 $this->bookingModel->update($bookingId, 'pending', $booking['special_requests']);
@@ -90,6 +106,21 @@ class PaymentController extends BaseController {
                 $booking = $this->bookingModel->findById($bookingId);
                 $this->bookingModel->update($bookingId, 'confirmed', $booking['special_requests'] ?? '');
                 $this->logActivity($me['id'], 'Confirm Cash Payment', "Staff confirmed cash payment #$id — booking #$bookingId is now confirmed");
+                
+                // Send email receipt
+                $subject = "Payment Confirmed - Booking #$bookingId";
+                $body = "
+                    <h2>Hello, " . htmlspecialchars($booking['customer_name']) . "!</h2>
+                    <p>Your cash payment has been confirmed by our front desk. Your booking is now <strong>CONFIRMED</strong>.</p>
+                    <hr style='border: 0; border-top: 1px solid #eee; margin: 20px 0;'>
+                    <p><strong>Payment details:</strong></p>
+                    <table style='width: 100%; font-size: 14px;'>
+                        <tr><td style='padding: 5px 0; color: #777;'>Amount Paid:</td><td style='font-weight: bold; color: #4cc97a;'>৳" . number_format($payment['amount']) . "</td></tr>
+                        <tr><td style='padding: 5px 0; color: #777;'>Method:</td><td style='font-weight: bold;'>Cash</td></tr>
+                    </table>
+                ";
+                sendHotelMail($booking['customer_email'], $subject, $body);
+
                 $this->jsonResponse(['success' => true, 'message' => 'Cash payment confirmed. Booking is now confirmed.']);
             } else {
                 $this->jsonResponse(['error' => 'Update failed']);
