@@ -32,19 +32,34 @@
       </div>
     </div>
 
-    <div class="card-visual" id="cardVisual">
-      <div class="card-chip"></div>
-      <div class="card-number-display" id="displayNumber">•••• •••• •••• ••••</div>
-      <div class="card-bottom">
-        <div>
-          <div class="card-bottom-label">Card Holder</div>
-          <div class="card-bottom-value" id="displayName">YOUR NAME</div>
+    <div class="card-container">
+      <div class="card-visual" id="cardVisual" data-brand="generic">
+        <!-- Front Side -->
+        <div class="card-front">
+          <div class="card-header-row">
+            <div class="card-chip"></div>
+            <div class="card-logo" id="cardLogoFront">💳</div>
+          </div>
+          <div class="card-number-display" id="displayNumber">•••• •••• •••• ••••</div>
+          <div class="card-bottom">
+            <div>
+              <div class="card-bottom-label">Card Holder</div>
+              <div class="card-bottom-value" id="displayName">YOUR NAME</div>
+            </div>
+            <div>
+              <div class="card-bottom-label">Expires</div>
+              <div class="card-bottom-value" id="displayExpiry">MM/YY</div>
+            </div>
+          </div>
         </div>
-        <div>
-          <div class="card-bottom-label">Expires</div>
-          <div class="card-bottom-value" id="displayExpiry">MM/YY</div>
+        <!-- Back Side -->
+        <div class="card-back">
+          <div class="card-magnetic-strip"></div>
+          <div class="card-signature-bar">
+            <div class="card-cvv-display" id="displayCvv">•••</div>
+          </div>
+          <div class="card-logo-back">💳</div>
         </div>
-        <div class="card-logo">💳</div>
       </div>
     </div>
 
@@ -145,10 +160,36 @@
       updateDisplay();
     }
 
+    function detectBrand(number) {
+      const clean = number.replace(/\s/g, '');
+      if (clean.startsWith('4')) return 'visa';
+      if (clean.startsWith('5')) return 'mastercard';
+      if (clean.startsWith('34') || clean.startsWith('37')) return 'amex';
+      if (clean.startsWith('6')) return 'discover';
+      return 'generic';
+    }
+
+    const brandLogos = {
+      visa: 'Visa',
+      mastercard: 'Mastercard',
+      amex: 'Amex',
+      discover: 'Discover',
+      generic: '💳'
+    };
+
     function updateDisplay() {
-      const num = document.getElementById('cardNumber').value || '•••• •••• •••• ••••';
+      const rawNum = document.getElementById('cardNumber').value;
+      const num = rawNum || '•••• •••• •••• ••••';
       const name = document.getElementById('cardName').value || 'YOUR NAME';
       const exp = document.getElementById('cardExpiry').value || 'MM/YY';
+
+      const brand = detectBrand(rawNum);
+      const cardVisual = document.getElementById('cardVisual');
+      cardVisual.setAttribute('data-brand', brand);
+
+      const logoText = brandLogos[brand] || '💳';
+      document.getElementById('cardLogoFront').textContent = logoText;
+      document.querySelector('.card-logo-back').textContent = logoText;
 
       const parts = num.split(' ');
       const masked = parts.map((p, i) => (i === 1 || i === 2) ? '••••' : p).join(' ');
@@ -156,6 +197,19 @@
       document.getElementById('displayName').textContent = name.toUpperCase().substring(0, 22);
       document.getElementById('displayExpiry').textContent = exp;
     }
+
+    // CVV flip events
+    document.getElementById('cardCvv').addEventListener('focus', () => {
+      document.getElementById('cardVisual').classList.add('flipped');
+    });
+    document.getElementById('cardCvv').addEventListener('blur', () => {
+      document.getElementById('cardVisual').classList.remove('flipped');
+    });
+    document.getElementById('cardCvv').addEventListener('input', (e) => {
+      let v = e.target.value.replace(/\D/g, '');
+      e.target.value = v;
+      document.getElementById('displayCvv').textContent = v || '•••';
+    });
 
     function validate() {
       const num = document.getElementById('cardNumber').value.replace(/\s/g, '');
@@ -189,7 +243,7 @@
       btn.disabled = true;
 
       document.getElementById('cardForm').classList.add('hide');
-      document.getElementById('cardVisual').style.display = 'none';
+      document.querySelector('.card-container').style.display = 'none';
       document.getElementById('summaryBox').style.display = 'none';
       document.getElementById('processing').classList.add('show');
 
@@ -217,7 +271,7 @@
           document.getElementById('successScreen').classList.add('show');
         } else {
           document.getElementById('cardForm').classList.remove('hide');
-          document.getElementById('cardVisual').style.display = '';
+          document.querySelector('.card-container').style.display = '';
           document.getElementById('summaryBox').style.display = '';
           const err = document.getElementById('errorMsg');
           err.textContent = data.error || 'Payment failed. Please try again.';
@@ -227,7 +281,7 @@
       } catch {
         document.getElementById('processing').classList.remove('show');
         document.getElementById('cardForm').classList.remove('hide');
-        document.getElementById('cardVisual').style.display = '';
+        document.querySelector('.card-container').style.display = '';
         document.getElementById('summaryBox').style.display = '';
         const err = document.getElementById('errorMsg');
         err.textContent = 'Connection error. Please try again.';
