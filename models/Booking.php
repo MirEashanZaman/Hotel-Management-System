@@ -74,31 +74,4 @@ class Booking extends BaseModel {
         $stmt = $this->db->prepare("DELETE FROM bookings WHERE id = ?");
         return $stmt->execute([$id]);
     }
-
-    /**
-     * Auto-checkout: mark bookings as 'checked_out' when checkout date has passed.
-     * Also frees the room back to 'available'.
-     */
-    public function autoCheckout() {
-        $today = date('Y-m-d');
-
-        // Find all bookings that should be auto-checked-out
-        $stmt = $this->db->prepare("
-            SELECT b.id, b.room_id FROM bookings b
-            WHERE b.check_out <= ? AND b.status = 'checked_in'
-        ");
-        $stmt->execute([$today]);
-        $expired = $stmt->fetchAll();
-
-        if (!empty($expired)) {
-            // Update booking statuses
-            $updateBooking = $this->db->prepare("UPDATE bookings SET status = 'checked_out' WHERE id = ?");
-            $updateRoom = $this->db->prepare("UPDATE rooms SET status = 'available' WHERE id = ? AND status = 'occupied'");
-
-            foreach ($expired as $b) {
-                $updateBooking->execute([$b['id']]);
-                $updateRoom->execute([$b['room_id']]);
-            }
-        }
-    }
 }

@@ -515,8 +515,7 @@ async function loadBookings() {
       : '';
 
     const showPay = role === 'customer' && b.payment_status !== 'paid';
-    const todayStr = new Date().toISOString().split('T')[0];
-    const isCompleted = b.status === 'checked_out' || (b.status !== 'cancelled' && b.check_out <= todayStr);
+    const isCompleted = b.status === 'checked_out';
     const showFeedbackBtn = role === 'customer' && isCompleted && !reviewedBookingIds.includes(parseInt(b.id));
 
     return `<tr>

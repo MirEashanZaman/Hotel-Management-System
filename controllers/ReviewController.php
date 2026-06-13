@@ -53,10 +53,9 @@ class ReviewController extends BaseController {
                 $this->jsonResponse(['error' => 'Booking not found']);
             }
 
-            $today = date('Y-m-d');
-            $isCompleted = ($booking['status'] === 'checked_out' || ($booking['status'] !== 'cancelled' && $booking['check_out'] <= $today));
+            $isCompleted = ($booking['status'] === 'checked_out');
             if (!$isCompleted) {
-                $this->jsonResponse(['error' => 'You can only review completed stays']);
+                $this->jsonResponse(['error' => 'You can only review checked out stays']);
             }
 
             if ($this->reviewModel->checkExists($bookingId, $me['id'])) {
