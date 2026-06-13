@@ -19,18 +19,23 @@ class Room extends BaseModel {
         return $result->fetch_all(MYSQLI_ASSOC);
     }
 
-    public function create($room_number, $room_type, $price, $capacity, $description, $amenities, $status, $floor) {
-        $stmt = $this->db->prepare("INSERT INTO rooms (room_number, room_type, price_per_night, capacity, description, amenities, status, floor) VALUES (?,?,?,?,?,?,?,?)");
-        $stmt->bind_param("ssdisssi", $room_number, $room_type, $price, $capacity, $description, $amenities, $status, $floor);
+    public function create($room_number, $room_type, $price, $capacity, $description, $amenities, $status, $floor, $image_url = null) {
+        $stmt = $this->db->prepare("INSERT INTO rooms (room_number, room_type, price_per_night, capacity, description, amenities, status, floor, image_url) VALUES (?,?,?,?,?,?,?,?,?)");
+        $stmt->bind_param("ssdisssis", $room_number, $room_type, $price, $capacity, $description, $amenities, $status, $floor, $image_url);
         if ($stmt->execute()) {
             return $this->db->insert_id;
         }
         return false;
     }
 
-    public function update($id, $room_type, $price, $capacity, $description, $amenities, $status, $floor) {
-        $stmt = $this->db->prepare("UPDATE rooms SET room_type=?, price_per_night=?, capacity=?, description=?, amenities=?, status=?, floor=? WHERE id=?");
-        $stmt->bind_param("sdiisssi", $room_type, $price, $capacity, $description, $amenities, $status, $floor, $id);
+    public function update($id, $room_type, $price, $capacity, $description, $amenities, $status, $floor, $image_url = null) {
+        if ($image_url) {
+            $stmt = $this->db->prepare("UPDATE rooms SET room_type=?, price_per_night=?, capacity=?, description=?, amenities=?, status=?, floor=?, image_url=? WHERE id=?");
+            $stmt->bind_param("sdiissssi", $room_type, $price, $capacity, $description, $amenities, $status, $floor, $image_url, $id);
+        } else {
+            $stmt = $this->db->prepare("UPDATE rooms SET room_type=?, price_per_night=?, capacity=?, description=?, amenities=?, status=?, floor=? WHERE id=?");
+            $stmt->bind_param("sdiisssi", $room_type, $price, $capacity, $description, $amenities, $status, $floor, $id);
+        }
         return $stmt->execute();
     }
 

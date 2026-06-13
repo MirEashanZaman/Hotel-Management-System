@@ -23,6 +23,7 @@ CREATE TABLE rooms (
     amenities TEXT,
     status ENUM('available','occupied','maintenance') NOT NULL DEFAULT 'available',
     floor INT DEFAULT 1,
+    image_url VARCHAR(255) DEFAULT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 

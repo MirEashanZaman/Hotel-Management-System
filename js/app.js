@@ -223,7 +223,8 @@ async function loadRooms() {
     <div class="room-wrap" data-status="${r.status}">
     <div class="card room-card" style="margin-bottom:0; position:relative; overflow:hidden; height:100%;">
       <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${r.status === 'available' ? 'var(--green)' : r.status === 'occupied' ? 'var(--orange)' : 'var(--red)'}"></div>
-      <div class="d-flex justify-between align-center" style="margin-bottom:12px;">
+      ${r.image_url ? `<div style="height:150px; width:100%; overflow:hidden; margin-bottom:12px; border-bottom: 1px solid var(--border);"><img src="${r.image_url}" style="width:100%; height:100%; object-fit:cover;"></div>` : ''}
+      <div class="d-flex justify-between align-center" style="margin-bottom:12px; padding: ${r.image_url ? '0 16px' : '0'};">
         <div>
           <div style="font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--text)">Room ${r.room_number}</div>
           <div style="font-size:10px;color:var(--text-muted);letter-spacing:1px;">Floor ${r.floor} · ${r.room_type}</div>
@@ -233,12 +234,14 @@ async function loadRooms() {
           <div style="font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--gold);margin-top:4px;">৳${Number(r.price_per_night).toLocaleString()}<span style="font-size:11px;color:var(--text-muted)">/night</span></div>
         </div>
       </div>
-      <div style="font-size:11px;color:var(--text2);margin-bottom:8px;">${r.description || ''}</div>
-      <div style="font-size:10px;color:var(--text-muted);">${r.amenities || ''}</div>
-      <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
-        ${canEdit ? `<button class="btn btn-ghost btn-sm" onclick="openRoomModal(${r.id})">Edit</button>` : ''}
-        ${isCustomer && r.status === 'available' ? `<button class="btn btn-primary btn-sm" onclick="openBookingModal(${r.id})">Book Now</button>` : ''}
-        ${canEdit && role === 'admin' ? `<button class="btn btn-danger btn-sm" onclick="deleteRoom(${r.id})">Delete</button>` : ''}
+      <div style="padding: ${r.image_url ? '0 16px 16px 16px' : '0'};">
+        <div style="font-size:11px;color:var(--text2);margin-bottom:8px;">${r.description || ''}</div>
+        <div style="font-size:10px;color:var(--text-muted);">${r.amenities || ''}</div>
+        <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
+          ${canEdit ? `<button class="btn btn-ghost btn-sm" onclick="openRoomModal(${r.id})">Edit</button>` : ''}
+          ${isCustomer && r.status === 'available' ? `<button class="btn btn-primary btn-sm" onclick="openBookingModal(${r.id})">Book Now</button>` : ''}
+          ${canEdit && role === 'admin' ? `<button class="btn btn-danger btn-sm" onclick="deleteRoom(${r.id})">Delete</button>` : ''}
+        </div>
       </div>
     </div></div>`).join('');
 
@@ -274,6 +277,11 @@ async function openRoomModal(id = null) {
       </div>
       <div class="form-group form-col-span"><label>Description</label><textarea id="f_rdesc">${room.description || ''}</textarea></div>
       <div class="form-group form-col-span"><label>Amenities</label><input id="f_rame" value="${room.amenities || ''}"></div>
+      <div class="form-group form-col-span">
+        <label>Room Picture</label>
+        <input type="file" id="f_rimage" accept="image/*">
+        ${room.image_url ? `<div style="margin-top: 8px;"><img src="${room.image_url}" style="max-height: 80px; border: 1px solid var(--border);"></div>` : ''}
+      </div>
     </div>
     <div class="form-actions">
       <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
@@ -283,17 +291,43 @@ async function openRoomModal(id = null) {
 }
 
 async function saveRoom(id) {
-  const body = {
-    room_type: val('f_rtype'), price_per_night: val('f_rprice'),
-    capacity: val('f_rcap'), floor: val('f_rfloor'),
-    status: val('f_rstatus'), description: val('f_rdesc'), amenities: val('f_rame')
-  };
-  if (!id) body.room_number = val('f_rno');
-  if (id) body.id = id;
-  const method = id ? 'PUT' : 'POST';
-  const res = await api('rooms.php', method, body);
-  if (res.success) { toast('Room saved!', 'success'); closeModal(); loadRooms(); }
-  else toast(res.error, 'error');
+  const fd = new FormData();
+  fd.append('room_type', val('f_rtype'));
+  fd.append('price_per_night', val('f_rprice'));
+  fd.append('capacity', val('f_rcap'));
+  fd.append('floor', val('f_rfloor'));
+  fd.append('status', val('f_rstatus'));
+  fd.append('description', val('f_rdesc'));
+  fd.append('amenities', val('f_rame'));
+
+  if (!id) fd.append('room_number', val('f_rno'));
+  if (id) fd.append('id', id);
+
+  const fileInput = document.getElementById('f_rimage');
+  if (fileInput && fileInput.files[0]) {
+    fd.append('image', fileInput.files[0]);
+  }
+
+  try {
+    const res = await fetch('api/rooms.php', {
+      method: 'POST',
+      body: fd
+    });
+    if (res.status === 401) {
+      window.location.href = 'index.php?route=login';
+      return;
+    }
+    const data = await res.json();
+    if (data.success) {
+      toast('Room saved!', 'success');
+      closeModal();
+      loadRooms();
+    } else {
+      toast(data.error, 'error');
+    }
+  } catch (e) {
+    toast('Server error', 'error');
+  }
 }
 
 async function deleteRoom(id) {

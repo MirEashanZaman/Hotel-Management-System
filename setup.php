@@ -5,6 +5,15 @@ require_once 'config/db.php';
 $errors = [];
 $success = [];
 
+$colCheck = $conn->query("SHOW COLUMNS FROM rooms LIKE 'image_url'");
+if ($colCheck->num_rows === 0) {
+    if ($conn->query("ALTER TABLE rooms ADD COLUMN image_url VARCHAR(255) DEFAULT NULL")) {
+        $success[] = "✓ Added image_url column to rooms table.";
+    } else {
+        $errors[] = "✗ Failed to add image_url column: " . $conn->error;
+    }
+}
+
 $hash = password_hash('12345678', PASSWORD_DEFAULT);
 
 $wrongHash = '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi';
