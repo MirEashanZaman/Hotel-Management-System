@@ -1,0 +1,374 @@
+/* ===== Public Home Page ===== */
+
+/* --- Navbar --- */
+.public-navbar {
+  height: 70px;
+  background: var(--dark2);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.public-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: var(--text);
+}
+
+.public-logo-title {
+  font-size: 14px;
+  margin: 0;
+}
+
+.public-logo-subtitle {
+  font-size: 8px;
+  margin: 0;
+}
+
+.public-nav-links {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+}
+
+.public-nav-links a {
+  color: var(--text2);
+  text-decoration: none;
+  font-size: 13px;
+  letter-spacing: 1px;
+  transition: color 0.2s;
+}
+
+.public-nav-links a:hover {
+  color: var(--gold);
+}
+
+.public-nav-btn {
+  border-radius: 0;
+}
+
+/* --- Hero Banner --- */
+.hero-banner {
+  background: linear-gradient(135deg, var(--dark3) 0%, var(--dark2) 100%);
+  border: 1px solid var(--border);
+  padding: 80px 40px;
+  text-align: center;
+  margin-bottom: 40px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-blur {
+  position: absolute;
+  top: -100px;
+  right: -100px;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  background: var(--gold-dim);
+  filter: blur(80px);
+  pointer-events: none;
+}
+
+.hero-tag {
+  font-size: 11px;
+  color: var(--gold);
+  letter-spacing: 3px;
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+.hero-heading {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 48px;
+  font-weight: 300;
+  line-height: 1.2;
+  margin-bottom: 20px;
+  color: var(--text);
+  letter-spacing: 1.2px;
+}
+
+.hero-desc {
+  color: var(--text2);
+  font-size: 14px;
+  max-width: 700px;
+  margin: 0 auto 32px;
+  line-height: 1.8;
+}
+
+.hero-cta {
+  padding: 12px 32px;
+  text-decoration: none;
+}
+
+/* --- Section Title --- */
+.home-section-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 28px;
+  color: var(--gold);
+  margin-bottom: 24px;
+  text-align: center;
+  letter-spacing: 1px;
+  font-weight: 300;
+}
+
+.home-section-title--flush {
+  margin-top: 0;
+}
+
+/* --- Main Content Area --- */
+.home-main {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+/* --- Stats Grid --- */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 50px;
+}
+
+.stat-card {
+  text-align: center;
+  margin-bottom: 0;
+  padding: 28px 16px;
+}
+
+.stat-value {
+  font-size: 36px;
+  color: var(--gold);
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: bold;
+}
+
+.stat-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-top: 6px;
+}
+
+/* --- Rooms Section --- */
+.home-rooms-section {
+  margin-bottom: 60px;
+}
+
+.home-rooms-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.home-rooms-loading {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 40px;
+  color: var(--text-muted);
+}
+
+/* --- Room Card --- */
+.room-card {
+  margin-bottom: 0;
+  padding: 0;
+  overflow: hidden;
+  border-color: var(--border);
+}
+
+.room-card-img {
+  height: 170px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.room-card-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.room-card-body {
+  padding: 20px;
+}
+
+.room-card-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px;
+  color: var(--text);
+}
+
+.room-card-meta {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.room-card-desc {
+  font-size: 12px;
+  color: var(--text2);
+  margin-bottom: 16px;
+  line-height: 1.6;
+  min-height: 50px;
+}
+
+.room-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.room-card-price {
+  font-size: 18px;
+  font-family: 'Cormorant Garamond', serif;
+  color: var(--gold);
+}
+
+.room-card-price-unit {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* --- Amenities Section --- */
+.amenities-section {
+  margin-bottom: 60px;
+  padding: 40px;
+}
+
+.amenities-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 32px;
+}
+
+.amenity-item {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.amenity-icon {
+  font-size: 28px;
+  color: var(--gold);
+}
+
+.amenity-title {
+  font-weight: 500;
+  font-size: 15px;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+
+.amenity-desc {
+  font-size: 12px;
+  color: var(--text2);
+  line-height: 1.6;
+}
+
+/* --- Reviews Section --- */
+.home-reviews-section {
+  margin-bottom: 60px;
+}
+
+.home-reviews-box {
+  padding: 24px;
+}
+
+.home-reviews-loading {
+  text-align: center;
+  padding: 20px;
+  color: var(--text-muted);
+}
+
+/* --- Review Item --- */
+.review-item {
+  border-bottom: 1px solid var(--border2);
+  padding: 16px 0;
+}
+
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.review-author {
+  color: var(--text);
+  font-size: 13px;
+}
+
+.review-room {
+  color: var(--text-muted);
+  font-size: 11px;
+  margin-left: 8px;
+}
+
+.review-comment {
+  font-size: 12px;
+  color: var(--text2);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* --- Footer --- */
+.home-footer {
+  border-top: 1px solid var(--border);
+  padding: 40px 20px;
+  text-align: center;
+  background: var(--dark2);
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.home-footer p:first-child {
+  margin-bottom: 8px;
+}
+
+/* --- Grid message states --- */
+.grid-msg-full {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 20px;
+  color: var(--text-muted);
+}
+
+.grid-msg-error {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 20px;
+  color: var(--red);
+}
+
+.reviews-msg-empty {
+  text-align: center;
+  padding: 20px;
+  color: var(--text-muted);
+}
+
+.reviews-msg-error {
+  text-align: center;
+  padding: 20px;
+  color: var(--red);
+}
+
+/* --- Review star --- */
+.star-on {
+  color: #c9a84c;
+  font-size: 16px;
+}
+
+.star-off {
+  color: var(--border);
+  font-size: 16px;
+}
