@@ -353,7 +353,6 @@ async function loadBookings() {
     <div class="d-flex justify-between align-center mb-16">
       <div style="font-size:12px;color:var(--text-muted)">${bookings.length} booking(s)</div>
       ${role === 'customer' ? `<button class="btn btn-primary btn-sm" onclick="navigate('rooms')">+ New Booking</button>` : ''}
-      ${canManage ? `<button class="btn btn-primary btn-sm" onclick="openNewBookingModal()">+ New Booking</button>` : ''}
     </div>`;
 
   const table = `<div class="card"><div class="table-wrap"><table>
