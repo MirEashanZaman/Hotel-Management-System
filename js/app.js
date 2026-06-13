@@ -11,8 +11,9 @@ function escapeHtml(str) {
 }
 
 const icons = {
+  home: `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>`,
   dashboard: `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>`,
-  rooms: `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>`,
+  rooms: `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/></svg>`,
   bookings: `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
   payments: `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>`,
   services: `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>`,
@@ -20,6 +21,7 @@ const icons = {
   logs: `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10,9 9,9 8,9"/></svg>`,
   profile: `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
   reviews: `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>`,
+  timeline: `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>`,
 };
 
 async function init() {
@@ -54,6 +56,7 @@ const NAV_CONFIG = {
     { id: 'dashboard', label: 'Dashboard', icon: icons.dashboard },
     { section: 'Operations' },
     { id: 'rooms', label: 'Rooms', icon: icons.rooms },
+    { id: 'timeline', label: 'Timeline View', icon: icons.timeline },
     { id: 'bookings', label: 'Bookings', icon: icons.bookings },
     { id: 'payments', label: 'Payments', icon: icons.payments },
     { id: 'services', label: 'Services', icon: icons.services },
@@ -69,6 +72,7 @@ const NAV_CONFIG = {
     { id: 'dashboard', label: 'Dashboard', icon: icons.dashboard },
     { section: 'Operations' },
     { id: 'rooms', label: 'Rooms', icon: icons.rooms },
+    { id: 'timeline', label: 'Timeline View', icon: icons.timeline },
     { id: 'bookings', label: 'Bookings', icon: icons.bookings },
     { id: 'payments', label: 'Payments', icon: icons.payments },
     { id: 'services', label: 'Services', icon: icons.services },
@@ -127,7 +131,8 @@ async function navigate(page) {
   document.getElementById('pageTitle').textContent = {
     dashboard: 'Dashboard', rooms: 'Browse Rooms', bookings: 'My Bookings',
     payments: 'My Payments', services: 'Services', users: 'Users',
-    logs: 'Activity Logs', profile: 'My Profile', reviews: 'Reviews'
+    logs: 'Activity Logs', profile: 'My Profile', reviews: 'Reviews',
+    timeline: 'Timeline View'
   }[page] || page;
 
   const content = document.getElementById('pageContent');
@@ -143,6 +148,7 @@ async function navigate(page) {
     case 'logs': await loadLogs(); break;
     case 'profile': await loadProfile(); break;
     case 'reviews': await loadReviews(); break;
+    case 'timeline': await loadTimeline(); break;
   }
 }
 
@@ -165,6 +171,20 @@ async function loadDashboard() {
         ${statCard('Staff Members', stats.total_staff, icons.users, '--blue')}
         ${statCard('Pending Payments', stats.pending_payments, icons.payments, '--orange')}
         ${statCard('Pending Services', stats.pending_services, icons.services, '--orange')}
+      </div>
+      <div class="dashboard-charts-grid">
+        <div class="card" style="margin-bottom:0;">
+          <div class="card-title">Revenue Trend <span class="subtitle">Last 6 Months</span></div>
+          <div style="position:relative; height:280px; width:100%;">
+            <canvas id="chartRevenue"></canvas>
+          </div>
+        </div>
+        <div class="card" style="margin-bottom:0;">
+          <div class="card-title">Room Occupancy <span class="subtitle">Current Status</span></div>
+          <div style="position:relative; height:280px; width:100%; display:flex; justify-content:center; align-items:center;">
+            <canvas id="chartOccupancy"></canvas>
+          </div>
+        </div>
       </div>`;
   } else if (role === 'staff') {
     statsHTML = `
@@ -210,6 +230,104 @@ async function loadDashboard() {
     </div>` : '';
 
   el.innerHTML = statsHTML + recentHTML;
+  if (role === 'admin') {
+    initDashboardCharts(stats);
+  }
+}
+
+function initDashboardCharts(stats) {
+  const revCtx = document.getElementById('chartRevenue');
+  if (revCtx) {
+    const revenueData = stats.monthly_revenue || [];
+    const labels = revenueData.map(d => d.month);
+    const data = revenueData.map(d => parseFloat(d.revenue));
+
+    new Chart(revCtx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Revenue (৳)',
+          data: data,
+          backgroundColor: 'rgba(201, 168, 76, 0.6)',
+          borderColor: '#c9a84c',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: 'rgba(255, 255, 255, 0.05)'
+            },
+            ticks: {
+              color: '#b0a898',
+              font: { family: 'Segoe UI' }
+            }
+          },
+          x: {
+            grid: {
+              display: false
+            },
+            ticks: {
+              color: '#b0a898',
+              font: { family: 'Segoe UI' }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  const occCtx = document.getElementById('chartOccupancy');
+  if (occCtx) {
+    new Chart(occCtx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Available', 'Occupied', 'Maintenance'],
+        datasets: [{
+          data: [
+            parseInt(stats.available_rooms || 0),
+            parseInt(stats.occupied_rooms || 0),
+            parseInt(stats.maintenance_rooms || 0)
+          ],
+          backgroundColor: [
+            'rgba(76, 201, 122, 0.6)',
+            'rgba(224, 146, 90, 0.6)',
+            'rgba(224, 90, 90, 0.6)'
+          ],
+          borderColor: [
+            '#4cc97a',
+            '#e0925a',
+            '#e05a5a'
+          ],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              color: '#e8e0d0',
+              font: { family: 'Segoe UI', size: 10 }
+            }
+          }
+        },
+        cutout: '70%'
+      }
+    });
+  }
 }
 
 function statCard(label, value, icon, accentVar) {
@@ -221,7 +339,7 @@ function statCard(label, value, icon, accentVar) {
 }
 
 async function loadRooms() {
-  const rooms = await api('rooms.php');
+  let rooms = await api('rooms.php');
   const role = CURRENT_USER.role;
   const canEdit = role === 'admin' || role === 'staff';
   const isCustomer = role === 'customer';
@@ -263,7 +381,7 @@ async function loadRooms() {
       </div>
     </div></div>`).join('');
 
-  document.getElementById('pageContent').innerHTML = filterBar + `<div class="rooms-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;">${roomCards || '<div class="empty-state"><p>No rooms found.</p></div>'}</div>`;
+  document.getElementById('pageContent').innerHTML = filterBar + `<div class="rooms-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;">${roomCards || '<div class="empty-state"><p>No rooms available.</p></div>'}</div>`;
 }
 
 function filterRooms(e, status) {
@@ -363,6 +481,14 @@ async function loadBookings() {
   const role = CURRENT_USER.role;
   const canManage = role === 'admin' || role === 'staff';
 
+  let reviewedBookingIds = [];
+  if (role === 'customer') {
+    const reviews = await api('reviews.php');
+    if (Array.isArray(reviews)) {
+      reviewedBookingIds = reviews.map(r => parseInt(r.booking_id));
+    }
+  }
+
   const header = `
     <div class="d-flex justify-between align-center mb-16">
       <div style="font-size:12px;color:var(--text-muted)">${bookings.length} booking(s)</div>
@@ -389,6 +515,9 @@ async function loadBookings() {
       : '';
 
     const showPay = role === 'customer' && b.payment_status !== 'paid';
+    const todayStr = new Date().toISOString().split('T')[0];
+    const isCompleted = b.status === 'checked_out' || (b.status !== 'cancelled' && b.check_out <= todayStr);
+    const showFeedbackBtn = role === 'customer' && isCompleted && !reviewedBookingIds.includes(parseInt(b.id));
 
     return `<tr>
           <td class="text-muted">#${b.id}</td>
@@ -404,6 +533,7 @@ async function loadBookings() {
             <button class="btn btn-ghost btn-sm" onclick="openBookingDetail(${b.id})">View</button>
             ${(canManage || (role === 'customer' && b.status === 'confirmed')) ? `<button class="btn btn-ghost btn-sm" onclick="editBooking(${b.id})">Edit</button>` : ''}
             ${showPay ? `<button class="btn btn-primary btn-sm" onclick="openPayFromBooking(${b.id}, ${b.total_price})">Pay Now</button>` : ''}
+            ${showFeedbackBtn ? `<button class="btn btn-primary btn-sm" onclick="openFeedbackModal(${b.id}, '${escapeHtml(b.room_number)}')">Give Feedback</button>` : ''}
           </td>
         </tr>`;
   }).join('') : '<tr><td colspan="9" class="text-muted" style="text-align:center;padding:40px">No bookings found.</td></tr>'}
@@ -441,27 +571,77 @@ async function openNewBookingModal() {
 }
 
 async function openBookingModal(roomId) {
-  const room = await api(`rooms.php?id=${roomId}`);
-  openModal('Book Room ' + escapeHtml(room.room_number), `
-    <div style="background:var(--dark4);border:1px solid var(--border);padding:16px;margin-bottom:20px;">
-      <div style="font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--text)">Room ${escapeHtml(room.room_number)} — ${escapeHtml(room.room_type)}</div>
-      <div style="color:var(--gold);font-size:18px;margin-top:4px;">৳${Number(room.price_per_night).toLocaleString()} / night</div>
-      <div style="color:var(--text-muted);font-size:11px;margin-top:6px;">${escapeHtml(room.amenities)}</div>
+  const rooms = await api('rooms.php');
+  const selectedRoom = rooms.find(r => r.id == roomId);
+  if (!selectedRoom) return;
+
+  const sortedRooms = [...rooms].sort((a,b) => {
+    if (a.floor !== b.floor) return a.floor - b.floor;
+    return a.room_number.localeCompare(b.room_number);
+  });
+
+  const floors = {};
+  sortedRooms.forEach(r => {
+    if (!floors[r.floor]) floors[r.floor] = [];
+    floors[r.floor].push(r);
+  });
+
+  let floorMapHTML = `<div style="margin-bottom: 20px;"><div style="font-size: 10px; color: var(--gold); letter-spacing: 1px; font-weight: bold; text-transform: uppercase; margin-bottom: 10px;">Select Room From Map</div>`;
+  Object.keys(floors).forEach(f => {
+    floorMapHTML += `
+      <div style="margin-bottom: 12px;">
+        <div style="font-size: 9px; color: var(--text-muted); margin-bottom: 6px; text-transform:uppercase; letter-spacing:1px;">Floor ${f}</div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          ${floors[f].map(r => {
+            let bgColor = 'var(--green)';
+            let cursor = 'pointer';
+            let title = `Room ${r.room_number} - Available`;
+            if (r.status === 'occupied') {
+              bgColor = 'var(--orange)';
+              cursor = 'not-allowed';
+              title = `Room ${r.room_number} - Occupied`;
+            } else if (r.status === 'maintenance') {
+              bgColor = 'var(--red)';
+              cursor = 'not-allowed';
+              title = `Room ${r.room_number} - Maintenance`;
+            }
+
+            const borderStyle = r.id == roomId ? 'border: 2px solid var(--text);' : 'border: 1px solid var(--border);';
+            const onClickAttr = r.status === 'available' ? `onclick="changeModalSelectedRoom(${r.id})"` : '';
+            return `<div ${onClickAttr} style="padding: 6px 12px; background:${bgColor}22; color:${bgColor}; ${borderStyle} border-radius: 4px; font-size: 11px; cursor: ${cursor}; font-weight:600;" title="${title}">Room ${escapeHtml(r.room_number)}</div>`;
+          }).join('')}
+        </div>
+      </div>
+    `;
+  });
+  floorMapHTML += `</div>`;
+
+  openModal('Book Room', `
+    ${floorMapHTML}
+    <div id="bookingSelectedRoomCard" style="background:var(--dark4);border:1px solid var(--border);padding:16px;margin-bottom:20px;">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--text)">Room ${escapeHtml(selectedRoom.room_number)} — ${escapeHtml(selectedRoom.room_type)}</div>
+      <div style="color:var(--gold);font-size:18px;margin-top:4px;">৳${Number(selectedRoom.price_per_night).toLocaleString()} / night</div>
+      <div style="color:var(--text-muted);font-size:11px;margin-top:6px;">${escapeHtml(selectedRoom.amenities)}</div>
     </div>
     <div class="form-grid">
-      <div class="form-group"><label>Check In</label><input type="date" id="f_bcin" min="${today()}" onchange="calcTotal(${room.price_per_night})"></div>
-      <div class="form-group"><label>Check Out</label><input type="date" id="f_bcout" min="${today()}" onchange="calcTotal(${room.price_per_night})"></div>
+      <div class="form-group"><label>Check In</label><input type="date" id="f_bcin" min="${today()}" onchange="calcTotal(${selectedRoom.price_per_night})"></div>
+      <div class="form-group"><label>Check Out</label><input type="date" id="f_bcout" min="${today()}" onchange="calcTotal(${selectedRoom.price_per_night})"></div>
       <div class="form-group form-col-span"><label>Special Requests</label><textarea id="f_breq" placeholder="Any special requirements..."></textarea></div>
     </div>
     <div id="totalPreview" style="background:var(--dark4);border:1px solid var(--border);padding:14px;margin-top:16px;display:none;">
       <div style="font-size:11px;color:var(--text-muted);">ESTIMATED TOTAL</div>
       <div style="font-family:'Cormorant Garamond',serif;font-size:26px;color:var(--gold);" id="totalAmount"></div>
     </div>
-    <div class="form-actions">
+    <div class="form-actions" id="bookingModalActions">
       <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
-      <button class="btn btn-primary" onclick="saveCustomerBooking(${roomId})">Confirm Booking</button>
+      <button class="btn btn-primary" onclick="saveCustomerBooking(${selectedRoom.id})">Confirm Booking</button>
     </div>
   `);
+}
+
+function changeModalSelectedRoom(roomId) {
+  closeModal();
+  setTimeout(() => openBookingModal(roomId), 150);
 }
 
 function calcTotal(pricePerNight) {
@@ -500,6 +680,23 @@ async function saveBooking() {
 
 async function openBookingDetail(id) {
   const b = await api(`bookings.php?id=${id}`);
+  
+  let reviewBtnHTML = '';
+  const todayStr = new Date().toISOString().split('T')[0];
+  const isCompleted = b.status === 'checked_out' || (b.status !== 'cancelled' && b.check_out <= todayStr);
+  if (CURRENT_USER.role === 'customer' && isCompleted) {
+    const rev = await api(`reviews.php?booking_id=${id}`);
+    if (Array.isArray(rev) && rev.length > 0) {
+      const firstRev = rev[0];
+      reviewBtnHTML = `
+        <button class="btn btn-ghost btn-sm" onclick="editReview(${firstRev.id}, ${firstRev.rating}, '${escapeHtml(firstRev.comment || '')}', ${b.id})">Edit Feedback</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteReviewFromModal(${firstRev.id}, ${b.id})">Delete Feedback</button>
+      `;
+    } else if (!rev || rev.error || !rev.id) {
+      reviewBtnHTML = `<button class="btn btn-primary" onclick="openFeedbackModal(${b.id}, '${escapeHtml(b.room_number)}')">Give Feedback</button>`;
+    }
+  }
+
   openModal(`Booking #${b.id}`, `
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
       <div style="background:var(--dark4);border:1px solid var(--border);padding:16px;">
@@ -523,7 +720,12 @@ async function openBookingDetail(id) {
       <div><div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Check In</div><div style="color:var(--text)">${formatDate(b.check_in)}</div></div>
       <div><div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Check Out</div><div style="color:var(--text)">${formatDate(b.check_out)}</div></div>
     </div>
-    ${b.special_requests ? `<div style="background:var(--dark4);border:1px solid var(--border);padding:14px;"><div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Special Requests</div><div style="color:var(--text2);font-size:12px;">${escapeHtml(b.special_requests)}</div></div>` : ''}
+    ${b.special_requests ? `<div style="background:var(--dark4);border:1px solid var(--border);padding:14px;margin-bottom:16px;"><div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Special Requests</div><div style="color:var(--text2);font-size:12px;">${escapeHtml(b.special_requests)}</div></div>` : ''}
+    <div class="form-actions" style="margin-top:20px;">
+      ${reviewBtnHTML}
+      <a href="invoice.php?id=${b.id}" target="_blank" class="btn btn-ghost" style="display:inline-block; text-decoration:none; text-align:center; padding: 10px 20px;">Print Invoice / PDF</a>
+      <button class="btn btn-ghost" onclick="closeModal()">Close</button>
+    </div>
   `);
 }
 
@@ -1216,6 +1418,7 @@ function reviewCard(r, isOwn) {
       </div>
       <div style="display:flex;align-items:center;gap:10px;">
         <div>${stars}</div>
+        ${isOwn ? `<button class="btn btn-ghost btn-sm" onclick="editReview(${r.id}, ${r.rating}, '${escapeHtml(r.comment || '')}')">Edit</button>` : ''}
         ${isOwn ? `<button class="btn btn-danger btn-sm" onclick="deleteReview(${r.id})">Delete</button>` : ''}
         ${CURRENT_USER.role === 'admin' ? `<button class="btn btn-danger btn-sm" onclick="deleteReview(${r.id})">Delete</button>` : ''}
       </div>
@@ -1256,6 +1459,115 @@ async function deleteReview(id) {
   const res = await api('reviews.php', 'DELETE', { id });
   if (res.success) { toast('Review deleted', 'success'); loadReviews(); }
   else toast(res.error, 'error');
+}
+
+function openFeedbackModal(bookingId, roomNumber) {
+  window._selectedRating = 0;
+  openModal(`Give Feedback for Room ${escapeHtml(roomNumber)}`, `
+    <div class="form-grid">
+      <div class="form-group form-col-span">
+        <label>Rating</label>
+        <div id="starRating" style="display:flex;gap:6px;margin-top:4px;">
+          ${[1, 2, 3, 4, 5].map(n => `<span onclick="setRating(${n})" data-star="${n}"
+            style="font-size:28px;cursor:pointer;color:var(--border);transition:color 0.15s;">★</span>`).join('')}
+        </div>
+      </div>
+      <div class="form-group form-col-span">
+        <label>Comment</label>
+        <textarea id="rev_comment" placeholder="Share your experience..." style="min-height:90px;"></textarea>
+      </div>
+    </div>
+    <div id="reviewAlert"></div>
+    <div class="form-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="submitModalReview(${bookingId})">Post Feedback</button>
+    </div>
+  `);
+}
+
+async function submitModalReview(bookingId) {
+  const rating = window._selectedRating || 0;
+  const comment = val('rev_comment');
+  const alertEl = document.getElementById('reviewAlert');
+  if (alertEl) alertEl.innerHTML = '';
+
+  if (!rating) {
+    if (alertEl) alertEl.innerHTML = '<div class="alert alert-error">Please select a star rating.</div>';
+    return;
+  }
+
+  const res = await api('reviews.php', 'POST', { booking_id: bookingId, rating, comment });
+  if (res.success) {
+    toast('Feedback posted! Thank you.', 'success');
+    closeModal();
+    loadBookings();
+  } else {
+    if (alertEl) alertEl.innerHTML = `<div class="alert alert-error">${res.error}</div>`;
+  }
+}
+
+function editReview(reviewId, currentRating, currentComment, bookingId = null) {
+  window._selectedRating = currentRating;
+  openModal(`Edit Feedback`, `
+    <div class="form-grid">
+      <div class="form-group form-col-span">
+        <label>Rating</label>
+        <div id="starRating" style="display:flex;gap:6px;margin-top:4px;">
+          ${[1, 2, 3, 4, 5].map(n => {
+            const color = n <= currentRating ? 'var(--gold)' : 'var(--border)';
+            return `<span onclick="setRating(${n})" data-star="${n}"
+              style="font-size:28px;cursor:pointer;color:${color};transition:color 0.15s;">★</span>`;
+          }).join('')}
+        </div>
+      </div>
+      <div class="form-group form-col-span">
+        <label>Comment</label>
+        <textarea id="rev_comment" placeholder="Share your experience..." style="min-height:90px;">${escapeHtml(currentComment)}</textarea>
+      </div>
+    </div>
+    <div id="reviewAlert"></div>
+    <div class="form-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="submitReviewUpdate(${reviewId}, ${bookingId})">Update Feedback</button>
+    </div>
+  `);
+}
+
+async function submitReviewUpdate(reviewId, bookingId) {
+  const rating = window._selectedRating || 0;
+  const comment = val('rev_comment');
+  const alertEl = document.getElementById('reviewAlert');
+  if (alertEl) alertEl.innerHTML = '';
+
+  if (!rating) {
+    if (alertEl) alertEl.innerHTML = '<div class="alert alert-error">Please select a star rating.</div>';
+    return;
+  }
+
+  const res = await api('reviews.php', 'PUT', { id: reviewId, rating, comment });
+  if (res.success) {
+    toast('Feedback updated!', 'success');
+    closeModal();
+    if (bookingId) {
+      openBookingDetail(bookingId);
+    } else {
+      loadReviews();
+    }
+  } else {
+    if (alertEl) alertEl.innerHTML = `<div class="alert alert-error">${res.error}</div>`;
+  }
+}
+
+async function deleteReviewFromModal(reviewId, bookingId) {
+  if (!confirm('Delete this review?')) return;
+  const res = await api('reviews.php', 'DELETE', { id: reviewId });
+  if (res.success) {
+    toast('Review deleted', 'success');
+    closeModal();
+    openBookingDetail(bookingId);
+  } else {
+    toast(res.error, 'error');
+  }
 }
 
 async function logout() {
@@ -1349,6 +1661,108 @@ function toast(msg, type = 'info') {
   t.innerHTML = `<span style="color:${type === 'success' ? 'var(--green)' : type === 'error' ? 'var(--red)' : 'var(--blue)'}">${icons_map[type]}</span> ${msg}`;
   container.appendChild(t);
   setTimeout(() => t.remove(), 3500);
+}
+
+async function loadTimeline() {
+  if (!window._timelineMonth && window._timelineMonth !== 0) {
+    const d = new Date();
+    window._timelineYear = d.getFullYear();
+    window._timelineMonth = d.getMonth();
+  }
+
+  const rooms = await api('rooms.php');
+  const bookings = await api('bookings.php');
+
+  const year = window._timelineYear;
+  const month = window._timelineMonth;
+  const dateObj = new Date(year, month, 1);
+  const monthName = dateObj.toLocaleString('en-GB', { month: 'long', year: 'numeric' });
+  const totalDays = new Date(year, month + 1, 0).getDate();
+
+  let html = `
+    <div class="card" style="padding:16px; margin-bottom:20px; overflow-x: auto;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <div style="font-family:'Cormorant Garamond',serif; font-size:22px; color:var(--text);">${monthName}</div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-ghost btn-sm" onclick="changeTimelineMonth(-1)">◀ Prev</button>
+          <button class="btn btn-ghost btn-sm" onclick="changeTimelineMonth(1)">Next ▶</button>
+        </div>
+      </div>
+      
+      <div class="table-wrap">
+        <table class="timeline-table" style="border-collapse:collapse; min-width:800px; width:100%;">
+          <thead>
+            <tr>
+              <th style="width:100px; text-align:left; border: 1px solid var(--border); padding:8px; position:sticky; left:0; background:var(--dark2); z-index:10;">Room</th>
+              ${Array.from({ length: totalDays }, (_, i) => {
+                const day = i + 1;
+                const isToday = new Date().getDate() === day && new Date().getMonth() === month && new Date().getFullYear() === year;
+                return `<th style="text-align:center; border: 1px solid var(--border); padding:8px; width:30px; font-size:10px; background:${isToday ? 'var(--gold-dim)' : 'transparent'}; color:${isToday ? 'var(--gold)' : 'inherit'};">${day}</th>`;
+              }).join('')}
+            </tr>
+          </thead>
+          <tbody>
+  `;
+
+  rooms.forEach(r => {
+    html += `
+      <tr>
+        <td style="font-weight:500; border: 1px solid var(--border); padding:8px; position:sticky; left:0; background:var(--dark2); z-index:10; font-size:12px;">
+          Room ${escapeHtml(r.room_number)} <span style="font-size:9px; color:var(--text-muted); display:block;">${escapeHtml(r.room_type)}</span>
+        </td>
+    `;
+
+    for (let day = 1; day <= totalDays; day++) {
+      const cellDateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      const cellDate = new Date(cellDateStr);
+
+      const b = bookings.find(book => {
+        if (Number(book.room_id) !== Number(r.id)) return false;
+        if (book.status === 'cancelled') return false;
+        const ci = new Date(book.check_in);
+        const co = new Date(book.check_out);
+        return cellDate >= ci && cellDate < co;
+      });
+
+      if (b) {
+        let color = 'var(--gold)';
+        if (b.status === 'checked_in') color = 'var(--green)';
+        if (b.status === 'checked_out') color = 'var(--text-muted)';
+        if (b.status === 'pending') color = 'var(--orange)';
+        
+        html += `
+          <td style="border: 1px solid var(--border); padding:0; text-align:center; cursor:pointer; background:${color}33;" onclick="openBookingDetail(${b.id})" title="Booking #${b.id} - ${escapeHtml(b.customer_name)}">
+            <div style="width:100%; height:20px; background:${color}; opacity:0.8; border-radius:2px;" title="Booking #${b.id}"></div>
+          </td>
+        `;
+      } else {
+        const isToday = new Date().getDate() === day && new Date().getMonth() === month && new Date().getFullYear() === year;
+        html += `<td style="border: 1px solid var(--border); padding:8px; background:${isToday ? 'var(--gold-dim)' : 'transparent'};"></td>`;
+      }
+    }
+    html += `</tr>`;
+  });
+
+  html += `
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('pageContent').innerHTML = html;
+}
+
+function changeTimelineMonth(offset) {
+  window._timelineMonth += offset;
+  if (window._timelineMonth > 11) {
+    window._timelineMonth = 0;
+    window._timelineYear++;
+  } else if (window._timelineMonth < 0) {
+    window._timelineMonth = 11;
+    window._timelineYear--;
+  }
+  loadTimeline();
 }
 
 init();
