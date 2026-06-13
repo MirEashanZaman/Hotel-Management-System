@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/bootstrap.php';
 
-$route = $_GET['route'] ?? 'login';
+$route = $_GET['route'] ?? 'home';
 
 switch ($route) {
     case 'signup':
@@ -14,7 +14,10 @@ switch ($route) {
         include __DIR__ . '/views/payment-card.php';
         break;
     case 'login':
-    default:
         include __DIR__ . '/views/login.php';
+        break;
+    case 'home':
+    default:
+        include __DIR__ . '/views/home.php';
         break;
 }

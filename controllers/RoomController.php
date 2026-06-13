@@ -3,7 +3,10 @@ class RoomController extends BaseController {
     private $roomModel;
 
     public function __construct() {
-        requireLogin();
+        $method = $_SERVER['REQUEST_METHOD'];
+        if ($method !== 'GET') {
+            requireLogin();
+        }
         $this->roomModel = new Room();
     }
 
