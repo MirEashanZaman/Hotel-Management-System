@@ -85,7 +85,7 @@ class Booking extends BaseModel {
         // Find all bookings that should be auto-checked-out
         $stmt = $this->db->prepare("
             SELECT b.id, b.room_id FROM bookings b
-            WHERE b.check_out <= ? AND b.status IN ('confirmed', 'checked_in', 'pending')
+            WHERE b.check_out <= ? AND b.status = 'checked_in'
         ");
         $stmt->execute([$today]);
         $expired = $stmt->fetchAll();
