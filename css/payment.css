@@ -514,3 +514,23 @@ body {
     opacity: 1;
   }
 }
+
+/* --- Inline Replacements --- */
+.summary-room {
+  margin-top: 3px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.summary-right {
+  text-align: right;
+}
+
+.text-green {
+  color: var(--green);
+}
+
+.success-booking-ref {
+  margin-top: 6px;
+}
+

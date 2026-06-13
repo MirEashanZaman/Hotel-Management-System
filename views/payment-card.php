@@ -23,10 +23,10 @@
       <div>
         <div class="summary-label">Booking</div>
         <div class="summary-value" id="summaryBooking">—</div>
-        <div class="summary-value" id="summaryRoom" style="margin-top:3px;font-size:12px;color:var(--text-muted)">—
+        <div class="summary-value summary-room" id="summaryRoom">—
         </div>
       </div>
-      <div style="text-align:right;">
+      <div class="summary-right">
         <div class="summary-label">Total Amount</div>
         <div class="summary-amount" id="summaryAmount">৳0</div>
       </div>
@@ -108,8 +108,8 @@
       <div class="success-icon">✓</div>
       <h3>Payment Successful!</h3>
       <div class="success-amount" id="successAmount">৳0</div>
-      <p>Your booking has been <strong style="color:var(--green)">confirmed</strong>.</p>
-      <p id="successBooking" style="margin-top:6px;"></p>
+      <p>Your booking has been <strong class="text-green">confirmed</strong>.</p>
+      <p id="successBooking" class="success-booking-ref"></p>
       <button class="btn-done" onclick="window.location.href='index.php?route=dashboard'">Go to Dashboard</button>
     </div>
 

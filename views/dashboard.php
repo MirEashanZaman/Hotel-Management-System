@@ -47,13 +47,13 @@
       <header class="topbar">
         <div class="page-title" id="pageTitle">Dashboard</div>
         <div class="topbar-actions">
-          <div style="font-size:11px; color:var(--text-muted);" id="topbarTime"></div>
+          <div class="topbar-time" id="topbarTime"></div>
         </div>
       </header>
 
       <main class="page-content" id="pageContent">
-        <div style="text-align:center; padding:80px 0; color:var(--text-muted);">
-          <div style="font-size:32px; margin-bottom:12px;">⏳</div>
+        <div class="page-loading">
+          <div class="page-loading-icon">⏳</div>
           <p>Loading...</p>
         </div>
       </main>
