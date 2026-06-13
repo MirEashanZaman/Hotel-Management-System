@@ -53,5 +53,16 @@ class Review extends BaseModel {
         $stmt->execute([$id, $customerId]);
         return $stmt->rowCount() > 0;
     }
+
+    public function findById($id) {
+        $stmt = $this->db->prepare("SELECT * FROM reviews WHERE id = ?");
+        $stmt->execute([$id]);
+        return $stmt->fetch();
+    }
+
+    public function update($id, $customerId, $rating, $comment) {
+        $stmt = $this->db->prepare("UPDATE reviews SET rating = ?, comment = ? WHERE id = ? AND customer_id = ?");
+        return $stmt->execute([$rating, $comment, $id, $customerId]);
+    }
 }
 

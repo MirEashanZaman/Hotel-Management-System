@@ -4,7 +4,10 @@ class ReviewController extends BaseController {
     private $bookingModel;
 
     public function __construct() {
-        requireLogin();
+        $method = $_SERVER['REQUEST_METHOD'];
+        if ($method !== 'GET') {
+            requireLogin();
+        }
         $this->reviewModel = new Review();
         $this->bookingModel = new Booking();
     }
@@ -50,8 +53,10 @@ class ReviewController extends BaseController {
                 $this->jsonResponse(['error' => 'Booking not found']);
             }
 
-            if ($booking['status'] !== 'checked_out') {
-                $this->jsonResponse(['error' => 'You can only review completed stays (checked out)']);
+            $today = date('Y-m-d');
+            $isCompleted = ($booking['status'] === 'checked_out' || ($booking['status'] !== 'cancelled' && $booking['check_out'] <= $today));
+            if (!$isCompleted) {
+                $this->jsonResponse(['error' => 'You can only review completed stays']);
             }
 
             if ($this->reviewModel->checkExists($bookingId, $me['id'])) {
@@ -64,6 +69,38 @@ class ReviewController extends BaseController {
                 $this->jsonResponse(['success' => true, 'message' => 'Review posted successfully!']);
             } else {
                 $this->jsonResponse(['error' => 'Failed to post review']);
+            }
+        }
+
+        if ($method === 'PUT') {
+            $this->checkCsrf();
+            if ($me['role'] !== 'customer') {
+                $this->jsonResponse(['error' => 'Only customers can edit reviews']);
+            }
+
+            $data    = $this->getInput();
+            $id      = intval($data['id'] ?? 0);
+            $rating  = intval($data['rating'] ?? 0);
+            $comment = trim($data['comment'] ?? '');
+
+            if (!$id || !$rating) {
+                $this->jsonResponse(['error' => 'Review ID and rating are required']);
+            }
+
+            if ($rating < 1 || $rating > 5) {
+                $this->jsonResponse(['error' => 'Rating must be between 1 and 5']);
+            }
+
+            $review = $this->reviewModel->findById($id);
+            if (!$review || $review['customer_id'] != $me['id']) {
+                $this->jsonResponse(['error' => 'Review not found or not authorized']);
+            }
+
+            if ($this->reviewModel->update($id, $me['id'], $rating, $comment)) {
+                $this->logActivity($me['id'], 'Review Updated', "Updated review #$id");
+                $this->jsonResponse(['success' => true, 'message' => 'Review updated successfully!']);
+            } else {
+                $this->jsonResponse(['error' => 'Failed to update review']);
             }
         }
 
