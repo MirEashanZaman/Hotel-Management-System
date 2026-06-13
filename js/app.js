@@ -531,7 +531,7 @@ async function loadBookings() {
           ${role === 'customer' ? `<td>${payBadge}</td>` : ''}
           <td style="display:flex;gap:6px;flex-wrap:wrap;">
             <button class="btn btn-ghost btn-sm" onclick="openBookingDetail(${b.id})">View</button>
-            ${(canManage || (role === 'customer' && b.status === 'confirmed')) ? `<button class="btn btn-ghost btn-sm" onclick="editBooking(${b.id})">Edit</button>` : ''}
+            ${canManage ? `<button class="btn btn-ghost btn-sm" onclick="editBooking(${b.id})">Edit</button>` : ''}
             ${showPay ? `<button class="btn btn-primary btn-sm" onclick="openPayFromBooking(${b.id}, ${b.total_price})">Pay Now</button>` : ''}
             ${showFeedbackBtn ? `<button class="btn btn-primary btn-sm" onclick="openFeedbackModal(${b.id}, '${escapeHtml(b.room_number)}')">Give Feedback</button>` : ''}
           </td>
@@ -734,9 +734,12 @@ async function editBooking(id) {
   const role = CURRENT_USER.role;
   const canManage = role === 'admin' || role === 'staff';
 
-  const statusOptions = canManage
-    ? ['pending', 'confirmed', 'checked_in', 'checked_out', 'cancelled']
-    : ['confirmed', 'cancelled'];
+  // Only staff/admin can change booking status; customers cannot cancel
+  if (!canManage) {
+    toast('Only staff or admin can modify booking status.', 'error');
+    return;
+  }
+  const statusOptions = ['pending', 'confirmed', 'checked_in', 'checked_out', 'cancelled'];
 
   openModal(`Edit Booking #${id}`, `
     <div class="form-grid">

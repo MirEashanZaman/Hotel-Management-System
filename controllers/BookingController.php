@@ -129,8 +129,9 @@ class BookingController extends BaseController {
             $requests = trim($data['special_requests'] ?? $booking['special_requests']);
 
             if ($me['role'] === 'customer') {
-                if (!in_array($status, ['confirmed', 'cancelled'])) {
-                    $this->jsonResponse(['error' => 'You can only cancel or keep the booking']);
+                // Customers cannot cancel confirmed bookings — only staff/admin can
+                if ($status !== $booking['status']) {
+                    $this->jsonResponse(['error' => 'You cannot change booking status. Please contact staff or admin to cancel.']);
                 }
             } else {
                 if ($status === 'checked_in') {
