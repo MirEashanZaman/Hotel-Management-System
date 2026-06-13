@@ -17,7 +17,7 @@ async function init() {
     const res = await fetch('api/session.php');
     const data = await res.json();
     if (!data.loggedIn) {
-      window.location.href = 'index.html';
+      window.location.href = 'index.php?route=login';
       return;
     }
     CURRENT_USER = data.user;
@@ -661,7 +661,7 @@ async function proceedWithPayment(bookingId, amount) {
   const method = window._payMethod || 'card';
   if (method === 'card') {
     closeModal();
-    window.location.href = `payment-card.html?booking_id=${bookingId}&amount=${amount}`;
+    window.location.href = `index.php?route=payment-card&booking_id=${bookingId}&amount=${amount}`;
   } else {
     const res = await api('payments.php', 'POST', {
       booking_id: bookingId,
@@ -1139,7 +1139,7 @@ async function deleteReview(id) {
 async function logout() {
   if (!confirm('Sign out?')) return;
   await fetch('api/logout.php');
-  window.location.href = 'index.html';
+  window.location.href = 'index.php?route=login';
 }
 
 async function api(endpoint, method = 'GET', body = null) {
@@ -1147,7 +1147,7 @@ async function api(endpoint, method = 'GET', body = null) {
   if (body) opts.body = JSON.stringify(body);
   const res = await fetch(`api/${endpoint}`, opts);
   if (res.status === 401) {
-    window.location.href = 'index.html';
+    window.location.href = 'index.php?route=login';
     return {};
   }
   const text = await res.text();

@@ -101,7 +101,7 @@ $success[] = "✓ $roomCount rooms in database.";
   <?php endif; ?>
 
   <?php if (empty($errors)): ?>
-    <a href="index.html" class="btn">Go to Login →</a>
+    <a href="index.php" class="btn">Go to Login →</a>
     <div class="warn">
       ⚠ <strong>Security Notice:</strong> Delete or restrict access to <code>setup.php</code> after setup is complete. This file resets all passwords to <code>12345678</code>.
     </div>
