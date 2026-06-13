@@ -112,7 +112,7 @@ class RoomController extends BaseController {
         }
 
         if ($method === 'DELETE') {
-            requireRole('admin');
+            requireRole(['admin', 'staff']);
             $data = $this->getInput();
             $id = intval($data['id'] ?? 0);
             if ($this->roomModel->delete($id)) {

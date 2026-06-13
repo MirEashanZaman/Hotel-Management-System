@@ -240,7 +240,7 @@ async function loadRooms() {
         <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
           ${canEdit ? `<button class="btn btn-ghost btn-sm" onclick="openRoomModal(${r.id})">Edit</button>` : ''}
           ${isCustomer && r.status === 'available' ? `<button class="btn btn-primary btn-sm" onclick="openBookingModal(${r.id})">Book Now</button>` : ''}
-          ${canEdit && role === 'admin' ? `<button class="btn btn-danger btn-sm" onclick="deleteRoom(${r.id})">Delete</button>` : ''}
+          ${canEdit ? `<button class="btn btn-danger btn-sm" onclick="deleteRoom(${r.id})">Delete</button>` : ''}
         </div>
       </div>
     </div></div>`).join('');
